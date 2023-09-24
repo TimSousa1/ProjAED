@@ -30,12 +30,3 @@ Board *readFile(char *filename){
     return board;
 }
 
-void showBoard(Board *board){
-
-    for (short i = board->lines - 1; i >= 0; i--){
-        for (short j = 0; j < board->columns; j++){
-            printf("%hi ", board->tilesBoard[i][j]);
-        }
-        printf("\n");
-    }
-}
