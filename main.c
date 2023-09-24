@@ -15,5 +15,9 @@ int main(int argc, char **argv){
 
     if (!tiles) return ERROR_FILE;
 
+    showBoard(tiles);
+    short s = findTileCluster(tiles, tiles->lines, tiles->columns);
+    printf("%hi\n", s);
+
     return 0;
 }

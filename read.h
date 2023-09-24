@@ -15,6 +15,7 @@ typedef struct _board {
 } Board;
 
 Board* readFile(char *filename);
+short findTileCluster(Board*, short line, short column);
 void showBoard(Board*);
 
 #endif
