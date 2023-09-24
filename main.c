@@ -10,10 +10,10 @@ int main(int argc, char **argv){
 
     char *filename = argv[1];
 
-    Board *tileBoard;
-    tileBoard = readFile(filename);
+    Board *tiles;
+    tiles = readFile(filename);
 
-    if (!tileBoard) return ERROR_FILE;
+    if (!tiles) return ERROR_FILE;
 
     return 0;
 }

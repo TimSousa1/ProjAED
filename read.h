@@ -15,5 +15,6 @@ typedef struct _board {
 } Board;
 
 Board* readFile(char *filename);
+void showBoard(Board*);
 
 #endif
