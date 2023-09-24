@@ -2,10 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Board *readFile(char *filename){
-
-    FILE *file = fopen(filename, "r");
-    if (!file) return NULL;
+Board *readFile(FILE *file){
 
     Board *board = (Board *) malloc (sizeof(Board));
 
@@ -26,7 +23,7 @@ Board *readFile(char *filename){
             fscanf(file, "%hi", &board->tilesBoard[i][j]);
         }
     }
-
+    if (feof(file)) board = NULL;
     return board;
 }
 
