@@ -7,8 +7,9 @@ Board *readFile(FILE *file){
     Board *board = (Board *) malloc (sizeof(Board));
 
     // getting the header of the tiles file
-    fscanf(file, "%hi %hi %hi %hi %hi",
-            &board->lines, &board->columns, &board->variant, &board->l, &board->c);
+    if (fscanf(file, "%hi %hi %hi %hi %hi",
+        &board->lines, &board->columns, &board->variant, &board->l, &board->c) != 5) 
+            return NULL;    
 
     // initializing the board matrix
     board->tilesBoard = (short **) malloc (board->lines * sizeof(short *));
@@ -23,7 +24,6 @@ Board *readFile(FILE *file){
             fscanf(file, "%hi", &board->tilesBoard[i][j]);
         }
     }
-    if (feof(file)) board = NULL;
     return board;
 }
 
