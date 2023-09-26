@@ -9,15 +9,20 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     char *filename = argv[1];
+    FILE *file = fopen(filename, "r");
+    if (!file) return ERROR_FILE;
 
     Board *tiles;
-    tiles = readFile(filename);
 
-    if (!tiles) return ERROR_FILE;
+    while (1){
+        tiles = readFile(file);
 
-    showBoard(tiles);
-    short s = findTileCluster(tiles, tiles->lines, tiles->columns);
-    printf("%hi\n", s);
+        // check for end of file
+        if (!tiles) break;
 
+        showBoard(tiles);
+        short s = findTileCluster(tiles, tiles->lines, tiles->columns);
+        printf("%hi\n", s);
+    }
     return 0;
 }

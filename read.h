@@ -1,6 +1,9 @@
 #ifndef _TILES
 #define _TILES
 
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct _board {
 
     short lines;
@@ -14,7 +17,7 @@ typedef struct _board {
 
 } Board;
 
-Board* readFile(char *filename);
+Board* readFile(FILE *file);
 short findTileCluster(Board*, short line, short column);
 void showBoard(Board*);
 
