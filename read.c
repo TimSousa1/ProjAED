@@ -24,6 +24,13 @@ Board *readFile(FILE *file){
             fscanf(file, "%hi", &board->tilesBoard[i][j]);
         }
     }
+    board->clusterSets = (ushort *) malloc (sizeof(ushort) * board->lines * board->columns);
+    printf("creating clusterSet\n");
+    for (ushort i = 0; i < board->lines * board->columns; i++){
+        board->clusterSets[i] = i;
+        printf("%i ", board->clusterSets[i]);
+    }
+    printf("\n");
     return board;
 }
 
