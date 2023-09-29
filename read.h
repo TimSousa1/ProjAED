@@ -14,6 +14,7 @@ typedef struct _board {
     short c, l;
 
     short **tilesBoard;
+    ushort *clusterSets;
 
 } Board;
 
