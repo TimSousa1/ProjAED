@@ -21,6 +21,7 @@ typedef struct _board {
 Board* readFile(FILE *file);
 void findTileCluster(Board*, short line, short column);
 void writeFile(FILE *file, Board *board);
+void removeCluster(Board *board); 
 void showBoard(Board*);
 
 #endif

@@ -1,4 +1,4 @@
-#include "read.h"
+#include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,9 +38,10 @@ void writeFile(FILE *file, Board *board) {
 
     short score = 0, cluster, i, j;
 
-    if (board->variant == 1) {
-        fprintf(file, "%hi %hi %hi %hi %hi\n",
+    fprintf(file, "%hi %hi %hi %hi %hi\n",
                 board->lines, board->columns, board->variant, board->l, board->c);
+
+    if (board->variant == 1) {
 
         cluster = board->clusterSets[board->l * board->columns + board->c];
 
@@ -49,6 +50,17 @@ void writeFile(FILE *file, Board *board) {
         }
 
         fprintf(file, "%hi\n", score * (score - 1));
+
+    } else if (board->variant == 2) {
+
+        removeCluster(board);
+
+        for (i = 0; i < board->lines; i++) {
+            for (j = 0; j < board->columns; j++) {
+                fprintf(file, "%i ", board->tilesBoard[i][j]);
+            }
+            fprintf(file, "\n");
+        } 
 
     }
 
