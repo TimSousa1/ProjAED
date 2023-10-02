@@ -2,15 +2,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Board *readFile(FILE *file){
+/******************************************************************************
+ * readFile ()
+ *
+ * Arguments: FILE * and short *
+ * Returns: Board *
+ * Side-Effects: changes the value of the second argument (error) if the problem is invalid
+ *
+ * Description: creates a Board and sets it up with the problem information
+ *****************************************************************************/
+
+Board *readFile(FILE *file, short *error){
 
     Board *board = (Board *) malloc (sizeof(Board));
 
     // getting the header of the tiles file
     if (fscanf(file, "%hi %hi %hi %hi %hi",
-        &board->lines, &board->columns, &board->variant, &board->l, &board->c) != 5) 
+        &board->lines, &board->columns, &board->variant, &board->l, &board->c) != 5) {
+            free(board);
             return NULL;    
-
+    } 
     // initializing the board matrix
     board->tilesBoard = (short **) malloc (board->lines * sizeof(short *));
 
@@ -31,8 +42,21 @@ Board *readFile(FILE *file){
         //printf("%i ", board->clusterSets[i]);
     }
     //printf("\n");
+    
+    if (board->variant < 1 || board->variant > 2 || board->l < 1 || board->c < 1) *error = 1; 
+
     return board;
 }
+
+/******************************************************************************
+ * writeFile ()
+ *
+ * Arguments: FILE * and Board *
+ * Returns: nothing
+ * Side-Effects: changes the second argument (Board *) if it's the second variant
+ *
+ * Description: writes to the output file the answer to the problem
+ *****************************************************************************/
 
 void writeFile(FILE *file, Board *board) {
 
@@ -55,7 +79,7 @@ void writeFile(FILE *file, Board *board) {
 
         removeCluster(board);
 
-        for (i = 0; i < board->lines; i++) {
+        for (i = board->lines - 1; i >= 0; i--) {
             for (j = 0; j < board->columns; j++) {
                 fprintf(file, "%i ", board->tilesBoard[i][j]);
             }
@@ -63,6 +87,8 @@ void writeFile(FILE *file, Board *board) {
         } 
 
     }
+
+    fprintf(file, "\n");
 
     return;
     

@@ -16,7 +16,18 @@ void listRemove(CellList *previous);
 void showCell(CellList *cell);
 void showCells(CellList *head);
 void showID(ushort *id, int size);
-void applyGravity(Board *board); 
+void applyGravity(Board *board);
+void freeList(CellList *head);
+
+/******************************************************************************
+ * findTileCluster ()
+ *
+ * Arguments: Board *, short and short
+ * Returns: nothing
+ * Side-Effects: Changes the clusterSets of the first argument (Board *)
+ *
+ * Description: Groups the tile provided as an argument in a cluster
+ *****************************************************************************/
 
 void findTileCluster(Board *board, short line, short column){
     ushort headID = board->clusterSets[(line - 1) * board->columns + column - 1];
@@ -44,9 +55,20 @@ void findTileCluster(Board *board, short line, short column){
         //showCells(head);
     }
     //showID(board->clusterSets, board->lines * board->columns);
+    freeList(head);
 
     return;
 }
+
+/******************************************************************************
+ * createCell ()
+ *
+ * Arguments: Board *, int, int, ushort, short
+ * Returns: CellList *
+ * Side-Effects: Creates a CellList *
+ *
+ * Description: Creates a Cell if its tile has the same color as the original tile
+ *****************************************************************************/
 
 CellList *createCell(Board *board, int line, int column, ushort id, short color){
     //printf("creating cell..\n checking cell boundaries..\n");
@@ -73,18 +95,23 @@ CellList *createCell(Board *board, int line, int column, ushort id, short color)
     return cell;
 }
 
+/******************************************************************************
+ * listAdd ()
+ *
+ * Arguments: CellList * and CellList *
+ * Returns: nothing
+ * Side-Effects: Puts the second argument in the same list as the first after it
+ *
+ * Description: Adds a new element to a list 
+ * *****************************************************************************/
+
 void listAdd(CellList *element, CellList *toAdd){
     if (!toAdd) return;
      
     toAdd->next = element->next;
     element->next = toAdd;
-}
 
-// remove the next element to the one being passed 
-void listRemove(CellList *previous){
-    CellList *tmp = previous->next;
-    previous->next = previous->next->next;
-    free(tmp);
+    return;
 }
 
 void showCell(CellList *cell){
@@ -112,11 +139,77 @@ void showBoard(Board *board){
     }
 }
 
+/******************************************************************************
+ * freeBoard ()
+ *
+ * Arguments: Board *
+ * Returns: nothing
+ * Side-Effects: Frees its argument
+ *
+ * Description: Frees the memory allocated for a Board
+ * *****************************************************************************/
+
+void freeBoard(Board *board) {
+
+    short i;
+
+    for (i = 0; i < board->lines; i++) {
+        free(board->tilesBoard[i]);
+    }
+    free(board->tilesBoard);
+    free(board->clusterSets);
+    free(board);
+
+    return;
+    
+}
+
+/******************************************************************************
+ * freeList ()
+ *
+ * Arguments: CellList *
+ * Returns: nothing
+ * Side-Effects: Frees its argument
+ *
+ * Description: Frees the memory allocated for a CellList
+ * *****************************************************************************/
+
+void freeList(CellList *head) {
+
+    CellList *tmp;
+
+    while (head) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+
+    return;
+    
+}
+
+/******************************************************************************
+ * removeCluster ()
+ *
+ * Arguments: Board *
+ * Returns: nothing
+ * Side-Effects: Changes the board->tilesBoard by removing a cluster 
+ * 
+ * Description: Removes a cluster from a board->tilesBoard
+ * *****************************************************************************/
+
 void removeCluster(Board *board) {
 
-    short cluster, i, j, k;
+    short cluster, i, j, k, loneTile;
 
-    cluster = board->clusterSets[board->l * board->columns + board->c];
+    cluster = board->clusterSets[(board->l - 1) * board->columns + (board->c - 1)];
+
+    loneTile = 1;
+    for (i = 0; i < board->lines * board->columns; i++) {
+        if (i != (board->l - 1) * board->columns + board->c - 1 && board->clusterSets[i] == cluster) loneTile = 0;
+    }
+
+    if (loneTile) return;
 
     for (i = 0; i < board->lines; i++) {
         for (j = 0; j < board->columns; j++) {
@@ -132,9 +225,19 @@ void removeCluster(Board *board) {
 
 }
 
+/******************************************************************************
+ * applyGravity ()
+ *
+ * Arguments: Board *
+ * Returns: nothing
+ * Side-Effects: Changes the board->tilesBoard as if gravity took effect to the tiles
+ 
+ * Description: Simulates gravity to the board->tilesBoard
+ * *****************************************************************************/
+
 void applyGravity(Board *board) {
 
-    short i, j, slide;
+    short i, j;
 
     for (i = 0; i < board->lines - 1; i++) {
         for (j = 0; j < board->columns; j++) {
@@ -145,11 +248,7 @@ void applyGravity(Board *board) {
         }
     }
     for (j = board->columns - 1; j > 0; j--) {
-        slide = 1;
-        for (i = 0; i < board->lines; i++) {
-            if (board->tilesBoard[i][j] == -1) slide = 0;
-        }
-        if (slide == 1) {
+        if (board->tilesBoard[0][j] == -1) {
             for (i = 0; i < board->lines; i++) {
                 board->tilesBoard[i][j] = board->tilesBoard[i][j - 1];
                 board->tilesBoard[i][j - 1] = -1;
