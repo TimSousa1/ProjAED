@@ -12,12 +12,10 @@ typedef struct _cellList{
 
 CellList *createCell(Board *board, int line, int column, ushort id, short color);
 void listAdd(CellList *element, CellList *toAdd);
-void listRemove(CellList *previous);
 void showCell(CellList *cell);
 void showCells(CellList *head);
 void showID(ushort *id, int size);
 void applyGravity(Board *board);
-void freeList(CellList *head);
 
 /******************************************************************************
  * findTileCluster ()
@@ -34,7 +32,6 @@ void findTileCluster(Board *board, short line, short column){
     //printf("creating list with headID %i\n", headID);
     CellList *head = (CellList*) malloc (sizeof(CellList));
     CellList *current = NULL;
-    CellList *previous = NULL;
 
     head->line = line - 1;
     head->column = column - 1;
@@ -50,12 +47,12 @@ void findTileCluster(Board *board, short line, short column){
         listAdd(current, createCell(board, current->line, current->column + 1, headID, head->color)); // right
 
         // should only run if for condition is met
-        previous = current;
         current = current->next;
+        free(head);
+        head = current;
         //showCells(head);
     }
     //showID(board->clusterSets, board->lines * board->columns);
-    freeList(head);
 
     return;
 }
@@ -165,30 +162,6 @@ void freeBoard(Board *board) {
 }
 
 /******************************************************************************
- * freeList ()
- *
- * Arguments: CellList *
- * Returns: nothing
- * Side-Effects: Frees its argument
- *
- * Description: Frees the memory allocated for a CellList
- * *****************************************************************************/
-
-void freeList(CellList *head) {
-
-    CellList *tmp;
-
-    while (head) {
-        tmp = head;
-        head = head->next;
-        free(tmp);
-    }
-
-    return;
-    
-}
-
-/******************************************************************************
  * removeCluster ()
  *
  * Arguments: Board *
@@ -232,7 +205,7 @@ void removeCluster(Board *board) {
  * Returns: nothing
  * Side-Effects: Changes the board->tilesBoard as if gravity took effect to the tiles
  
- * Description: Simulates gravity to the board->tilesBoard
+ * Description: Adds a new element to a list 
  * *****************************************************************************/
 
 void applyGravity(Board *board) {
