@@ -210,21 +210,27 @@ void removeCluster(Board *board) {
 
 void applyGravity(Board *board) {
 
-    short i, j;
+    short line, column, counter;
 
-    for (i = 0; i < board->lines - 1; i++) {
-        for (j = 0; j < board->columns; j++) {
-            if (board->tilesBoard[i][j] == -1) {
-                board->tilesBoard[i][j] = board->tilesBoard[i + 1][j];
-                board->tilesBoard[i + 1][j] = -1;
+    for (column = 0; column < board->columns; column++) {
+        counter = 0;
+        for (line = 0; line < board->lines; line++) {
+            if (board->tilesBoard[line][column] == -1) {
+                counter++;
+            } else if (counter) {
+                board->tilesBoard[line - counter][column] = board->tilesBoard[line][column];
+                board->tilesBoard[line][column] = -1;
             }
         }
     }
-    for (j = board->columns - 1; j > 0; j--) {
-        if (board->tilesBoard[0][j] == -1) {
-            for (i = 0; i < board->lines; i++) {
-                board->tilesBoard[i][j] = board->tilesBoard[i][j - 1];
-                board->tilesBoard[i][j - 1] = -1;
+    counter = 0;
+    for (column = board->columns - 1; column >= 0; column--) {
+        if (board->tilesBoard[0][column] == -1) {
+            counter++;
+        } else if (counter) {
+            for (line = 0; line < board->lines; line++) {
+                board->tilesBoard[line][column + counter] = board->tilesBoard[line][column];
+                board->tilesBoard[line][column] = -1;
             }
         }
     }
