@@ -33,6 +33,5 @@ void freeBoard(Board *board);
 void freeCluster(CellList *head);
 void removeCluster(Board *board, CellList *head); 
 ushort getScore(Board *board, CellList *head);
-void showBoard(Board*);
 
 #endif
