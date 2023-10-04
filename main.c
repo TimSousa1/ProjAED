@@ -5,8 +5,6 @@
 #define ERROR_ARGUMENTS 1
 #define ERROR_FILE 2
 
-//TODO: fix read for other variants and matrix sizes
-// free board properly
 
 int main(int argc, char **argv){
 
@@ -14,8 +12,8 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     /* Allocating memory to know if there are any problems with the problem format */
-    short *error = (short *) malloc(sizeof(short));
-    short score;
+    int *error = (int *) malloc(sizeof(int));
+    uint score;
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
     char *filenameOut;
@@ -41,21 +39,23 @@ int main(int argc, char **argv){
 
         /* Reading a single problem and creating a board for it */
         tiles = readFile(fileIn, error);
-        // check for end of file
-        if (!tiles) break;
-        /* Checking if the problem ws invalid or not */
+        /* Checking if the problem is invalid or not */
         if (*error == 1) {
             /* Writing the problem header and moving on to the next problem after freeing the board */
-            fprintf(fileOut, "%hi %hi %hi %hi %hi\n\n", 
+            fprintf(fileOut, "%i %i %i %i %i\n\n", 
                     tiles->lines, tiles->columns, tiles->variant, tiles->l, tiles->c);
             freeBoard(tiles);
             continue;
         }
+        // check for end of file
+        if (!tiles) break;
+
         /* Creating a cluster with the tile in the problem */
         cluster = findTileCluster(tiles, tiles->l, tiles->c);
-        /* Writing to the output file*/
-        if (tiles->variant == 1) score = getScore(tiles, cluster);
+        /* Getting either the score of the cluster or removing depending on what the problem wants */
+        if (tiles->variant == 1) score = getScore(cluster);
         else if (tiles->variant == 2) removeCluster(tiles, cluster); 
+        /* Writing to the output file */
         writeFile(fileOut, tiles, score);
         /* Freeing the board and the cluster as they are no longer necessary */
         freeCluster(cluster);

@@ -3,29 +3,37 @@
 #include <stdlib.h>
 
 
-CellList *createCell(Board *board, int line, int column, ushort id, short color);
+CellList *createCell(Board *board, int line, int column, uint id, int color);
 void listAdd(CellList *element, CellList *toAdd);
 void applyGravity(Board *board);
 
 /******************************************************************************
  * findTileCluster ()
  *
- * Arguments: Board *, short and short
+ * Arguments: Board *board, int line and int column
  * Returns: CellList *
  * Side-Effects: Changes the clusterSets of the first argument (Board *)
  *
  * Description: Groups the tile provided as an argument in a cluster
  *****************************************************************************/
 
-CellList *findTileCluster(Board *board, short line, short column){
-    ushort headID = board->clusterSets[(line - 1) * board->columns + column - 1];
+CellList *findTileCluster(Board *board, int line, int column){
+
+    /* Remember the id of the cluster */
+    uint headID = board->clusterSets[(line - 1) * board->columns + column - 1];
+    
+    /* Allocating memory for the CellList head */
     CellList *head = (CellList*) malloc (sizeof(CellList));
+
     CellList *current = NULL;
 
+    /* Filling the with correct information in the board */
     head->line = line - 1;
     head->column = column - 1;
     head->color = board->tilesBoard[line - 1][column - 1];
     head->next = NULL;
+
+    if (head->color == -1) return head;
 
     for (current = head; current;){
 
@@ -35,6 +43,7 @@ CellList *findTileCluster(Board *board, short line, short column){
         listAdd(current, createCell(board, current->line, current->column - 1, headID, head->color)); // left
         listAdd(current, createCell(board, current->line, current->column + 1, headID, head->color)); // right
 
+        /* Check the next tile for all neighbours of the same color */
         current = current->next;
     }
 
@@ -44,49 +53,58 @@ CellList *findTileCluster(Board *board, short line, short column){
 /******************************************************************************
  * createCell ()
  *
- * Arguments: Board *, int, int, ushort, short
- * Returns: CellList *
- * Side-Effects: Creates a CCircuitosellList *
+ * Arguments: Board *board, int line, int column, uint id, int color
+ * Returns: CellList *cell
+ * Side-Effects: Creates a CellList *
  *
  * Description: Creates a Cell if its tile has the same color as the original tile
  *****************************************************************************/
 
-CellList *createCell(Board *board, int line, int column, ushort id, short color){
+CellList *createCell(Board *board, int line, int column, uint id, int color){
     
+    /* Checking if the we're looking for a tile outside of the matrix */
     if (line > board->lines - 1 || line < 0 ||
             column > board->columns - 1 || column < 0){
         return NULL;
     }
+    /* Checking if the tile has the same color */
     if (board->tilesBoard[line][column] != color) return NULL;
 
-    ushort i = line * board->columns + column;
+    uint i = line * board->columns + column;
 
+    /* Checking if it has already been added */
     if (board->clusterSets[i] == id) return NULL;
     board->clusterSets[i] = id;
 
+    /* Allocating memory for the new cell */
     CellList *cell = (CellList*) malloc (sizeof(CellList));
 
+    /* Filling the cell with the correct information */
     cell->line = line;
     cell->column = column;
     cell->color = board->tilesBoard[line][column];
     cell->next = NULL;
 
+    /* Returning the created cell */
     return cell;
 }
 
 /******************************************************************************
  * listAdd ()
  *
- * Arguments: CellList * and CellList *
+ * Arguments: CellList *element and CellList *toAdd
  * Returns: nothing
- * Side-Effects: Puts the second argument in the same list as the first after it
+ * Side-Effects: Puts the second argument after ithe first in its list
  *
  * Description: Adds a new element to a list 
  * *****************************************************************************/
 
 void listAdd(CellList *element, CellList *toAdd){
+    
+    /* Checking if we are trying to add nothing */
     if (!toAdd) return;
-     
+    
+    /* Adding the cells in order */
     toAdd->next = element->next;
     element->next = toAdd;
 
@@ -96,7 +114,7 @@ void listAdd(CellList *element, CellList *toAdd){
 /******************************************************************************
  * freeBoard ()
  *
- * Arguments: Board *
+ * Arguments: Board *board
  * Returns: nothing
  * Side-Effects: Frees its argument
  *
@@ -105,23 +123,38 @@ void listAdd(CellList *element, CellList *toAdd){
 
 void freeBoard(Board *board) {
 
-    short i;
-
+    int i;
+    /* Freeing the memory allocated for the tiles matrix */
     for (i = 0; i < board->lines; i++) {
         free(board->tilesBoard[i]);
     }
     free(board->tilesBoard);
+    
+    /* Freeing the memory allocated for the clustersets array */
     free(board->clusterSets);
+
+    /* Freeing the memory allocated for the board */
     free(board);
 
     return;
     
 }
 
+/******************************************************************************
+ * freeCluster ()
+ *
+ * Arguments: CellList *head
+ * Returns: nothing
+ * Side-Effects: Frees its argument
+ *
+ * Description: Frees the memory allocated for a CellList
+ * *****************************************************************************/
+
 void freeCluster(CellList *head) {
 
     CellList *tmp;
 
+    /* Freeing the memory allocated for each member of the list */
     while (head) {
         tmp = head->next;
         free(head);
@@ -134,7 +167,7 @@ void freeCluster(CellList *head) {
 /******************************************************************************
  * removeCluster ()
  *
- * Arguments: Board *
+ * Arguments: Board *board and CellList *head
  * Returns: nothing
  * Side-Effects: Changes the board->tilesBoard by removing a cluster 
  * 
@@ -145,12 +178,15 @@ void removeCluster(Board *board, CellList *head) {
 
     CellList *aux;
 
+    /* Making sure the cluster isn't a single tile */
     if (!head->next) return;
 
+    /* Removing each member of the cluster by changing its color to -1 */
     for (aux = head; aux; aux = aux->next) {
         board->tilesBoard[aux->line][aux->column] = -1;
     }
 
+    /* Making sure to apply gravity after removing a cluster */
     applyGravity(board);
 
     return;
@@ -160,32 +196,41 @@ void removeCluster(Board *board, CellList *head) {
 /******************************************************************************
  * applyGravity ()
  *
- * Arguments: Board *
+ * Arguments: Board *board
  * Returns: nothing
  * Side-Effects: Changes the board->tilesBoard as if gravity took effect to the tiles
  
- * Description: Adds a new element to a list 
+ * Description: Simulates vertical and horizontal gravity 
  * *****************************************************************************/
 
 void applyGravity(Board *board) {
 
-    short line, column, counter;
-
+    int line, column, counter;
+    
+    /* Simulating vertical gravity */
     for (column = 0; column < board->columns; column++) {
+        /* Setting the counter of empty tiles to 0 */
         counter = 0;
         for (line = 0; line < board->lines; line++) {
+
+            /* Counting the number of empty tiles */
             if (board->tilesBoard[line][column] == -1) {
                 counter++;
+            /* Making a tile fall */
             } else if (counter) {
                 board->tilesBoard[line - counter][column] = board->tilesBoard[line][column];
                 board->tilesBoard[line][column] = -1;
             }
         }
     }
+
+    /* Simulating horizontal gravity */
     counter = 0;
     for (column = board->columns - 1; column >= 0; column--) {
+        /* Counting the number of empty columns */
         if (board->tilesBoard[0][column] == -1) {
             counter++;
+        /* Sliding a column to the right */
         } else if (counter) {
             for (line = 0; line < board->lines; line++) {
                 board->tilesBoard[line][column + counter] = board->tilesBoard[line][column];
@@ -198,12 +243,23 @@ void applyGravity(Board *board) {
 
 }
 
-ushort getScore(Board *board, CellList *head) {
+/******************************************************************************
+ * getScore ()
+ *
+ * Arguments: CellList *head
+ * Returns: uint score
+ * Side-Effects: none
+ *
+ * Description: Calculates the score of a cluster
+ * *****************************************************************************/
 
-    ushort numOfBlocks = 0;
+uint getScore(CellList *head) {
+
+    uint numOfBlocks = 0;
     CellList *aux; 
 
-    for (aux = head; aux; aux = aux->next) if (board->tilesBoard[aux->line][aux->column] != -1) numOfBlocks++;
+    /* Counts the number of tiles in the cluster */
+    for (aux = head; aux; aux = aux->next) numOfBlocks++;
 
     return numOfBlocks * (numOfBlocks - 1);
 }
