@@ -1,6 +1,7 @@
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /******************************************************************************
  * readFile ()
@@ -49,6 +50,22 @@ Board *readFile(FILE *file, int *error){
     
     /* Returns the board created */
     return board;
+}
+
+char *outputName(char *inputName) {
+
+    char *name;
+    uint len;
+
+    len = strlen(inputName);
+
+    name = (char *) malloc((len + 1) * sizeof(char));
+
+    name = strncpy(name, inputName, len - 11);
+
+    name = strcat(name, ".singlestep");
+
+    return name;
 }
 
 /******************************************************************************

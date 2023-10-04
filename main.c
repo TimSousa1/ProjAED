@@ -17,12 +17,9 @@ int main(int argc, char **argv){
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
     char *filenameOut;
-    char *name = (char *) malloc((strlen(filenameIn) + 1) * sizeof(char));
-    CellList *cluster;
     
-    name = strcpy(name, filenameIn);
-    name = strtok(name, ".");
-    filenameOut = strcat(name, ".singlestep");
+    /* Get the output file name */
+    filenameOut = outputName(filenameIn); 
 
     /* Opening the input and output files */
     FILE *fileIn = fopen(filenameIn, "r");
@@ -32,7 +29,8 @@ int main(int argc, char **argv){
     if (!fileIn || !fileOut) return ERROR_FILE;
     
     Board *tiles;
-
+    CellList *cluster; 
+    
     while (1){
         /* Reseting error */
         *error = 0;
@@ -63,7 +61,7 @@ int main(int argc, char **argv){
     }
     /* Freeing the variable error and closing the files before closing the programm */
     free(error);
-    free(name);
+    free(filenameOut);
     fclose(fileIn);
     fclose(fileOut);
     return 0;

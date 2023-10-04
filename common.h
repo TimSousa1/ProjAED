@@ -34,5 +34,5 @@ void freeCluster(CellList *head);
 void removeCluster(Board *board, CellList *head); 
 uint getScore(CellList *head);
 void showBoard(Board*);
-
+char *outputName(char *inputName);
 #endif
