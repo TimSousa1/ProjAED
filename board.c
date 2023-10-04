@@ -2,13 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct _cellList{
-    int line;
-    int column;
-    int color;
-
-    struct _cellList *next;
-} CellList;
 
 CellList *createCell(Board *board, int line, int column, ushort id, short color);
 void listAdd(CellList *element, CellList *toAdd);
@@ -27,7 +20,7 @@ void applyGravity(Board *board);
  * Description: Groups the tile provided as an argument in a cluster
  *****************************************************************************/
 
-void findTileCluster(Board *board, short line, short column){
+CellList *findTileCluster(Board *board, short line, short column){
     ushort headID = board->clusterSets[(line - 1) * board->columns + column - 1];
     //printf("creating list with headID %i\n", headID);
     CellList *head = (CellList*) malloc (sizeof(CellList));
@@ -48,13 +41,11 @@ void findTileCluster(Board *board, short line, short column){
 
         // should only run if for condition is met
         current = current->next;
-        free(head);
-        head = current;
         //showCells(head);
     }
     //showID(board->clusterSets, board->lines * board->columns);
 
-    return;
+    return head;
 }
 
 /******************************************************************************
@@ -62,7 +53,7 @@ void findTileCluster(Board *board, short line, short column){
  *
  * Arguments: Board *, int, int, ushort, short
  * Returns: CellList *
- * Side-Effects: Creates a CellList *
+ * Side-Effects: Creates a CCircuitosellList *
  *
  * Description: Creates a Cell if its tile has the same color as the original tile
  *****************************************************************************/
@@ -161,6 +152,19 @@ void freeBoard(Board *board) {
     
 }
 
+void freeCluster(CellList *head) {
+
+    CellList *tmp;
+
+    while (head) {
+        tmp = head->next;
+        free(head);
+        head = tmp;
+    }
+
+    return;
+}
+
 /******************************************************************************
  * removeCluster ()
  *
@@ -171,25 +175,14 @@ void freeBoard(Board *board) {
  * Description: Removes a cluster from a board->tilesBoard
  * *****************************************************************************/
 
-void removeCluster(Board *board) {
+void removeCluster(Board *board, CellList *head) {
 
-    short cluster, i, j, k, loneTile;
+    CellList *aux;
 
-    cluster = board->clusterSets[(board->l - 1) * board->columns + (board->c - 1)];
+    if (!head->next) return;
 
-    loneTile = 1;
-    for (i = 0; i < board->lines * board->columns; i++) {
-        if (i != (board->l - 1) * board->columns + board->c - 1 && board->clusterSets[i] == cluster) loneTile = 0;
-    }
-
-    if (loneTile) return;
-
-    for (i = 0; i < board->lines; i++) {
-        for (j = 0; j < board->columns; j++) {
-            if (board->clusterSets[i * board->columns + j] == cluster) {
-                board->tilesBoard[i][j] = -1;
-            }
-        }
+    for (aux = head; aux; aux = aux->next) {
+        board->tilesBoard[aux->line][aux->column] = -1;
     }
 
     applyGravity(board);
@@ -238,3 +231,14 @@ void applyGravity(Board *board) {
     return;
 
 }
+
+ushort getScore(Board *board, CellList *head) {
+
+    ushort numOfBlocks = 0;
+    CellList *aux; 
+
+    for (aux = head; aux; aux = aux->next) if (board->tilesBoard[aux->line][aux->column] != -1) numOfBlocks++;
+
+    return numOfBlocks * (numOfBlocks - 1);
+}
+

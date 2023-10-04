@@ -35,13 +35,11 @@ Board *readFile(FILE *file, short *error){
             fscanf(file, "%hi", &board->tilesBoard[i][j]);
         }
     }
-    board->clusterSets = (ushort *) malloc (sizeof(ushort) * board->lines * board->columns);
-    //printf("creating clusterSet\n");
-    for (ushort i = 0; i < board->lines * board->columns; i++){
+    board->clusterSets = (uint *) malloc (sizeof(uint) * board->lines * board->columns);
+    for (uint i = 0; i < board->lines * board->columns; i++){
         board->clusterSets[i] = i;
         //printf("%i ", board->clusterSets[i]);
     }
-    //printf("\n");
     
     if (board->variant < 1 || board->variant > 2 || board->l < 1 || board->c < 1) *error = 1; 
 
@@ -58,26 +56,20 @@ Board *readFile(FILE *file, short *error){
  * Description: writes to the output file the answer to the problem
  *****************************************************************************/
 
-void writeFile(FILE *file, Board *board) {
+void writeFile(FILE *file, Board *board, CellList *head) {
 
-    short score = 0, cluster, i, j;
+    short i, j;
 
     fprintf(file, "%hi %hi %hi %hi %hi\n",
                 board->lines, board->columns, board->variant, board->l, board->c);
 
     if (board->variant == 1) {
 
-        cluster = board->clusterSets[board->l * board->columns + board->c];
-
-        for (i = 0; i < board->lines * board->columns; i++) {
-            if (board->clusterSets[i] == cluster) score++;
-        }
-
-        fprintf(file, "%hi\n", score * (score - 1));
+        fprintf(file, "%hi\n", getScore(board, head));
 
     } else if (board->variant == 2) {
 
-        removeCluster(board);
+        removeCluster(board, head);
 
         for (i = board->lines - 1; i >= 0; i--) {
             for (j = 0; j < board->columns; j++) {

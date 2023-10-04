@@ -14,15 +14,25 @@ typedef struct _board {
     short c, l;
 
     short **tilesBoard;
-    ushort *clusterSets;
+    uint *clusterSets;
 
 } Board;
 
+typedef struct _cellList{
+    int line;
+    int column;
+    int color;
+
+    struct _cellList *next;
+} CellList;
+
 Board* readFile(FILE *file, short *error);
-void findTileCluster(Board*, short line, short column);
-void writeFile(FILE *file, Board *board);
+CellList *findTileCluster(Board*, short line, short column);
+void writeFile(FILE *file, Board *board, CellList *head);
 void freeBoard(Board *board);
-void removeCluster(Board *board); 
+void freeCluster(CellList *head);
+void removeCluster(Board *board, CellList *head); 
+ushort getScore(Board *board, CellList *head);
 void showBoard(Board*);
 
 #endif

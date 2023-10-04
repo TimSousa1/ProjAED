@@ -20,6 +20,7 @@ int main(int argc, char **argv){
     char *filenameIn = argv[1];
     char *filenameOut;
     char *name = (char *) malloc((strlen(filenameIn) + 1) * sizeof(char));
+    CellList *cluster;
     
     name = strcpy(name, filenameIn);
     name = strtok(name, ".");
@@ -52,10 +53,11 @@ int main(int argc, char **argv){
         }
         //showBoard(tiles);
         /* Creating a cluster with the tile in the problem */
-        findTileCluster(tiles, tiles->l, tiles->c);
+        cluster = findTileCluster(tiles, tiles->l, tiles->c);
         /* Writing to the output file*/
-        writeFile(fileOut, tiles);
+        writeFile(fileOut, tiles, cluster);
         /* Freeing the board as it is no longer necessary */
+        freeCluster(cluster);
         freeBoard(tiles);
     }
     /* Freeing the variable error and closing the files before closing the programm */
