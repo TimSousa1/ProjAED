@@ -1,7 +1,7 @@
 compile:
-	gcc -c main.c -g
-	gcc -c file.c -g
-	gcc -c board.c -g
+	gcc -c main.c 
+	gcc -c file.c
+	gcc -c board.c
 	gcc main.o file.o board.o -o tileblaster -Wall -std=c99 -O3
 
 clean::
