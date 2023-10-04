@@ -11,7 +11,7 @@ void applyGravity(Board *board);
  * findTileCluster ()
  *
  * Arguments: Board *, short and short
- * Returns: nothing
+ * Returns: CellList *
  * Side-Effects: Changes the clusterSets of the first argument (Board *)
  *
  * Description: Groups the tile provided as an argument in a cluster
@@ -29,12 +29,12 @@ CellList *findTileCluster(Board *board, short line, short column){
 
     for (current = head; current;){
 
+        /* This adds adjacent tiles that have the same color to the list in order to check the tiles adjacent to them later on */
         listAdd(current, createCell(board, current->line + 1, current->column, headID, head->color)); // up
         listAdd(current, createCell(board, current->line - 1, current->column, headID, head->color)); // down
         listAdd(current, createCell(board, current->line, current->column - 1, headID, head->color)); // left
         listAdd(current, createCell(board, current->line, current->column + 1, headID, head->color)); // right
 
-        // should only run if for condition is met
         current = current->next;
     }
 

@@ -15,7 +15,7 @@ int main(int argc, char **argv){
 
     /* Allocating memory to know if there are any problems with the problem format */
     short *error = (short *) malloc(sizeof(short));
-
+    short score;
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
     char *filenameOut;
@@ -51,12 +51,13 @@ int main(int argc, char **argv){
             freeBoard(tiles);
             continue;
         }
-        //showBoard(tiles);
         /* Creating a cluster with the tile in the problem */
         cluster = findTileCluster(tiles, tiles->l, tiles->c);
         /* Writing to the output file*/
-        writeFile(fileOut, tiles, cluster);
-        /* Freeing the board as it is no longer necessary */
+        if (tiles->variant == 1) score = getScore(tiles, cluster);
+        else if (tiles->variant == 2) removeCluster(tiles, cluster); 
+        writeFile(fileOut, tiles, score);
+        /* Freeing the board and the cluster as they are no longer necessary */
         freeCluster(cluster);
         freeBoard(tiles);
     }

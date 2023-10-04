@@ -38,7 +38,6 @@ Board *readFile(FILE *file, short *error){
     board->clusterSets = (uint *) malloc (sizeof(uint) * board->lines * board->columns);
     for (uint i = 0; i < board->lines * board->columns; i++){
         board->clusterSets[i] = i;
-        //printf("%i ", board->clusterSets[i]);
     }
     
     if (board->variant < 1 || board->variant > 2 || board->l < 1 || board->c < 1) *error = 1; 
@@ -56,7 +55,7 @@ Board *readFile(FILE *file, short *error){
  * Description: writes to the output file the answer to the problem
  *****************************************************************************/
 
-void writeFile(FILE *file, Board *board, CellList *head) {
+void writeFile(FILE *file, Board *board, short score) {
 
     short i, j;
 
@@ -65,11 +64,9 @@ void writeFile(FILE *file, Board *board, CellList *head) {
 
     if (board->variant == 1) {
 
-        fprintf(file, "%hi\n", getScore(board, head));
+        fprintf(file, "%hi\n", score);
 
     } else if (board->variant == 2) {
-
-        removeCluster(board, head);
 
         for (i = board->lines - 1; i >= 0; i--) {
             for (j = 0; j < board->columns; j++) {

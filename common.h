@@ -28,7 +28,7 @@ typedef struct _cellList{
 
 Board* readFile(FILE *file, short *error);
 CellList *findTileCluster(Board*, short line, short column);
-void writeFile(FILE *file, Board *board, CellList *head);
+void writeFile(FILE *file, Board *board, short score);
 void freeBoard(Board *board);
 void freeCluster(CellList *head);
 void removeCluster(Board *board, CellList *head); 
