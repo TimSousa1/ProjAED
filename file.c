@@ -64,8 +64,9 @@ char *outputName(char *inputName) {
     strcpy(name, inputName);
 
     extension = strstr(name, ".tilewalls1");
-    if (!extension) return NULL;
+    if (!extension) {free(name); return NULL;}
     memcpy(extension, ".singlestep", 11);
+
     return name;
 }
 
