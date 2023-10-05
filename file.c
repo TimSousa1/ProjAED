@@ -24,11 +24,7 @@ Board *readFile(FILE *file, int *error){
             return NULL;    
     } 
     /* Checking if the problem is invalid or not */
-    if (board->variant < 1 || board->variant > 2 || board->l < 1 ||
-        board->c < 1 || board->l > board->lines || board->c > board->columns) {
-        *error = 1;
-        return board;
-    }
+    
     // initializing the board matrix
     board->tilesBoard = (int **) malloc (board->lines * sizeof(int *));
 
@@ -47,7 +43,12 @@ Board *readFile(FILE *file, int *error){
     for (uint i = 0; i < board->lines * board->columns; i++){
         board->clusterSets[i] = i;
     }
-    
+    /* Checking if the problem is invalid or not */
+    if (board->variant < 1 || board->variant > 2 || board->l < 1 ||
+        board->c < 1 || board->l > board->lines || board->c > board->columns) {
+        *error = 1;
+        return board;
+    }
     /* Returns the board created */
     return board;
 }
