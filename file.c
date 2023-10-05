@@ -55,16 +55,17 @@ Board *readFile(FILE *file, int *error){
 char *outputName(char *inputName) {
 
     char *name;
+    char *extension;
     uint len;
 
     len = strlen(inputName);
 
     name = (char *) malloc((len + 1) * sizeof(char));
+    strcpy(name, inputName);
 
-    name = strncpy(name, inputName, len - 11);
-
-    name = strcat(name, ".singlestep");
-
+    extension = strstr(name, ".tilewalls1");
+    if (!extension) return NULL;
+    memcpy(extension, ".singlestep", 11);
     return name;
 }
 

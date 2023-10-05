@@ -20,6 +20,7 @@ int main(int argc, char **argv){
     
     /* Get the output file name */
     filenameOut = outputName(filenameIn); 
+    if (!filenameOut) return ERROR_FILE;
 
     /* Opening the input and output files */
     FILE *fileIn = fopen(filenameIn, "r");
