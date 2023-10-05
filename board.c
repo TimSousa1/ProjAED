@@ -1,112 +1,266 @@
-#include "read.h"
+#include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct _cellList{
-    int line;
-    int column;
-    int color;
 
-    struct _cellList *next;
-} CellList;
-
-CellList *createCell(Board *board, int line, int column, ushort id, short color);
+CellList *createCell(Board *board, int line, int column, uint id, int color);
 void listAdd(CellList *element, CellList *toAdd);
-void listRemove(CellList *previous);
-void showCell(CellList *cell);
-void showCells(CellList *head);
-void showID(ushort *id, int size);
+void applyGravity(Board *board);
 
-short findTileCluster(Board *board, short line, short column){
-    short score;
-    ushort headID = board->clusterSets[(line - 1) * board->columns + column - 1];
-    printf("creating list with headID %i\n", headID);
+/******************************************************************************
+ * findTileCluster ()
+ *
+ * Arguments: Board *board, int line and int column
+ * Returns: CellList *
+ * Side-Effects: Changes the clusterSets of the first argument (Board *)
+ *
+ * Description: Groups the tile provided as an argument in a cluster
+ *****************************************************************************/
+
+CellList *findTileCluster(Board *board, int line, int column){
+
+    /* Remember the id of the cluster */
+    uint headID = board->clusterSets[(line - 1) * board->columns + column - 1];
+    
+    /* Allocating memory for the CellList head */
     CellList *head = (CellList*) malloc (sizeof(CellList));
-    CellList *current = NULL;
-    CellList *previous = NULL;
 
+    CellList *current = NULL;
+
+    /* Filling the with correct information in the board */
     head->line = line - 1;
     head->column = column - 1;
     head->color = board->tilesBoard[line - 1][column - 1];
     head->next = NULL;
 
-    // TODO: optimize? take ifs from createCell and listAdd and move them to the loop
+    if (head->color == -1) return head;
+
     for (current = head; current;){
 
+        /* This adds adjacent tiles that have the same color to the list in order to check the tiles adjacent to them later on */
         listAdd(current, createCell(board, current->line + 1, current->column, headID, head->color)); // up
         listAdd(current, createCell(board, current->line - 1, current->column, headID, head->color)); // down
         listAdd(current, createCell(board, current->line, current->column - 1, headID, head->color)); // left
         listAdd(current, createCell(board, current->line, current->column + 1, headID, head->color)); // right
 
-        // should only run if for condition is met
-        previous = current;
+        /* Check the next tile for all neighbours of the same color */
         current = current->next;
-        showCells(head);
     }
-    showID(board->clusterSets, board->lines * board->columns);
-    return score;
+
+    return head;
 }
 
-CellList *createCell(Board *board, int line, int column, ushort id, short color){
-    printf("creating cell..\n checking cell boundaries..\n");
+/******************************************************************************
+ * createCell ()
+ *
+ * Arguments: Board *board, int line, int column, uint id, int color
+ * Returns: CellList *cell
+ * Side-Effects: Creates a CellList *
+ *
+ * Description: Creates a Cell if its tile has the same color as the original tile
+ *****************************************************************************/
+
+CellList *createCell(Board *board, int line, int column, uint id, int color){
+    
+    /* Checking if the we're looking for a tile outside of the matrix */
     if (line > board->lines - 1 || line < 0 ||
             column > board->columns - 1 || column < 0){
-        printf("cell out of bounds!\n");
         return NULL;
     }
+    /* Checking if the tile has the same color */
     if (board->tilesBoard[line][column] != color) return NULL;
 
-    ushort i = line * board->columns + column;
+    uint i = line * board->columns + column;
 
-    if (board->clusterSets[i] == id) {printf("cell already on clusterSet\n"); return NULL;}
+    /* Checking if it has already been added */
+    if (board->clusterSets[i] == id) return NULL;
     board->clusterSets[i] = id;
 
+    /* Allocating memory for the new cell */
     CellList *cell = (CellList*) malloc (sizeof(CellList));
 
+    /* Filling the cell with the correct information */
     cell->line = line;
     cell->column = column;
     cell->color = board->tilesBoard[line][column];
     cell->next = NULL;
-    printf("cell created with attributes "); showCell(cell);
 
+    /* Returning the created cell */
     return cell;
 }
 
+/******************************************************************************
+ * listAdd ()
+ *
+ * Arguments: CellList *element and CellList *toAdd
+ * Returns: nothing
+ * Side-Effects: Puts the second argument after ithe first in its list
+ *
+ * Description: Adds a new element to a list 
+ * *****************************************************************************/
+
 void listAdd(CellList *element, CellList *toAdd){
+    
+    /* Checking if we are trying to add nothing */
     if (!toAdd) return;
-     
+    
+    /* Adding the cells in order */
     toAdd->next = element->next;
     element->next = toAdd;
+
+    return;
 }
 
-// remove the next element to the one being passed 
-void listRemove(CellList *previous){
-    CellList *tmp = previous->next;
-    previous->next = previous->next->next;
-    free(tmp);
-}
+/******************************************************************************
+ * freeBoard ()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: Frees its argument
+ *
+ * Description: Frees the memory allocated for a Board
+ * *****************************************************************************/
 
-void showCell(CellList *cell){
-        printf("----\n%i (%i, %i)\n", cell->color, cell->line, cell->column);
-}
+void freeBoard(Board *board) {
 
-void showCells(CellList *head){
-    for (CellList *current = head; current; current = current->next){
-        printf("----\n%i (%i, %i)\n", current->color, current->line, current->column);
+    int i;
+    /* Freeing the memory allocated for the tiles matrix */
+    for (i = 0; i < board->lines; i++) {
+        free(board->tilesBoard[i]);
     }
+    free(board->tilesBoard);
+    
+    /* Freeing the memory allocated for the clustersets array */
+    free(board->clusterSets);
+
+    /* Freeing the memory allocated for the board */
+    free(board);
+
+    return;
+    
 }
 
-void showID(ushort *id, int size){
-    printf("printing IDs..\n");
-    for (ushort i = 0; i < size; i++) printf("%i ", id[i]);
-    printf("\n");
+/******************************************************************************
+ * freeCluster ()
+ *
+ * Arguments: CellList *head
+ * Returns: nothing
+ * Side-Effects: Frees its argument
+ *
+ * Description: Frees the memory allocated for a CellList
+ * *****************************************************************************/
+
+void freeCluster(CellList *head) {
+
+    CellList *tmp;
+
+    /* Freeing the memory allocated for each member of the list */
+    while (head) {
+        tmp = head->next;
+        free(head);
+        head = tmp;
+    }
+
+    return;
 }
 
-void showBoard(Board *board){
-    for (short i = board->lines - 1; i >= 0; i--){
-        for (short j = 0; j < board->columns; j++){
-            printf("%hi ", board->tilesBoard[i][j]);
+/******************************************************************************
+ * removeCluster ()
+ *
+ * Arguments: Board *board and CellList *head
+ * Returns: nothing
+ * Side-Effects: Changes the board->tilesBoard by removing a cluster 
+ * 
+ * Description: Removes a cluster from a board->tilesBoard
+ * *****************************************************************************/
+
+void removeCluster(Board *board, CellList *head) {
+
+    CellList *aux;
+
+    /* Making sure the cluster isn't a single tile */
+    if (!head->next) return;
+
+    /* Removing each member of the cluster by changing its color to -1 */
+    for (aux = head; aux; aux = aux->next) {
+        board->tilesBoard[aux->line][aux->column] = -1;
+    }
+
+    /* Making sure to apply gravity after removing a cluster */
+    applyGravity(board);
+
+    return;
+
+}
+
+/******************************************************************************
+ * applyGravity ()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: Changes the board->tilesBoard as if gravity took effect to the tiles
+ 
+ * Description: Simulates vertical and horizontal gravity 
+ * *****************************************************************************/
+
+void applyGravity(Board *board) {
+
+    int line, column, counter;
+    
+    /* Simulating vertical gravity */
+    for (column = 0; column < board->columns; column++) {
+        /* Setting the counter of empty tiles to 0 */
+        counter = 0;
+        for (line = 0; line < board->lines; line++) {
+
+            /* Counting the number of empty tiles */
+            if (board->tilesBoard[line][column] == -1) {
+                counter++;
+            /* Making a tile fall */
+            } else if (counter) {
+                board->tilesBoard[line - counter][column] = board->tilesBoard[line][column];
+                board->tilesBoard[line][column] = -1;
+            }
         }
-        printf("\n");
     }
+
+    /* Simulating horizontal gravity */
+    counter = 0;
+    for (column = board->columns - 1; column >= 0; column--) {
+        /* Counting the number of empty columns */
+        if (board->tilesBoard[0][column] == -1) {
+            counter++;
+        /* Sliding a column to the right */
+        } else if (counter) {
+            for (line = 0; line < board->lines; line++) {
+                board->tilesBoard[line][column + counter] = board->tilesBoard[line][column];
+                board->tilesBoard[line][column] = -1;
+            }
+        }
+    }
+
+    return;
+
 }
+
+/******************************************************************************
+ * getScore ()
+ *
+ * Arguments: CellList *head
+ * Returns: uint score
+ * Side-Effects: none
+ *
+ * Description: Calculates the score of a cluster
+ * *****************************************************************************/
+
+uint getScore(CellList *head) {
+
+    uint numOfBlocks = 0;
+    CellList *aux; 
+
+    /* Counts the number of tiles in the cluster */
+    for (aux = head; aux; aux = aux->next) numOfBlocks++;
+
+    return numOfBlocks * (numOfBlocks - 1);
+}
+
