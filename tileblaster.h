@@ -13,7 +13,7 @@ typedef struct _board {
 
     int c, l;
 
-    int **tilesBoard;
+    int **tiles;
     uint *clusterSets;
 
 } Board;
@@ -26,13 +26,19 @@ typedef struct _cellList{
     struct _cellList *next;
 } CellList;
 
-Board* readFile(FILE *file, int *error);
-CellList *findTileCluster(Board*, int line, int column);
-void writeFile(FILE *file, Board *board, uint score);
-void freeBoard(Board *board);
-void freeCluster(CellList *head);
+
+Board* getBoard(FILE *file, int *error);
+
+CellList *findCluster(Board*, int line, int column);
 void removeCluster(Board *board, CellList *head); 
+
 uint getScore(CellList *head);
 void showBoard(Board*);
+
 char *outputName(char *inputName);
+void writeFile(FILE *file, Board *board, uint score);
+
+void freeBoard(Board *board);
+void freeCluster(CellList *head);
+
 #endif

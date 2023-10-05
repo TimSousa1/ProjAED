@@ -1,4 +1,4 @@
-#include "common.h"
+#include "tileblaster.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +13,7 @@
  * Description: creates a Board and sets it up with the current problem information
  *****************************************************************************/
 
-Board *readFile(FILE *file, int *error){
+Board *getBoard(FILE *file, int *error){
 
     Board *board = (Board *) malloc (sizeof(Board));
 
@@ -26,16 +26,16 @@ Board *readFile(FILE *file, int *error){
     /* Checking if the problem is invalid or not */
     
     // initializing the board matrix
-    board->tilesBoard = (int **) malloc (board->lines * sizeof(int *));
+    board->tiles = (int **) malloc (board->lines * sizeof(int *));
 
     for (uint k = 0; k < board->lines; k++) {
-        board->tilesBoard[k] = (int *) malloc (board->columns * sizeof(int));
+        board->tiles[k] = (int *) malloc (board->columns * sizeof(int));
     }
 
     // getting every element off of the file
     for (int i = board->lines - 1; i >= 0; i--){
         for (int j = 0; j < board->columns; j++){
-            fscanf(file, "%i", &board->tilesBoard[i][j]);
+            fscanf(file, "%i", &board->tiles[i][j]);
         }
     }
     /* Initializing the clusterSets array*/
@@ -90,23 +90,18 @@ void writeFile(FILE *file, Board *board, uint score) {
 
     /* Checking the problem variant to see what to write, if it's 1 it writes the score, otherwise 
     * writes the matrix*/ 
-    if (board->variant == 1) {
-
+    if (board->variant == 1)
         fprintf(file, "%u\n", score);
 
-    } else if (board->variant == 2) {
-
+    else if (board->variant == 2) {
         for (i = board->lines - 1; i >= 0; i--) {
             for (j = 0; j < board->columns; j++) {
-                fprintf(file, "%i ", board->tilesBoard[i][j]);
+                fprintf(file, "%i ", board->tiles[i][j]);
             }
             fprintf(file, "\n");
         } 
-
     }
-
     fprintf(file, "\n");
 
     return;
-    
 }

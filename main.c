@@ -1,4 +1,4 @@
-#include "common.h"
+#include "tileblaster.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     /* Making sure the files were opened correctly */
     if (!fileIn || !fileOut) return ERROR_FILE;
     
-    Board *tiles;
+    Board *board;
     CellList *cluster; 
     
     while (1){
@@ -37,32 +37,38 @@ int main(int argc, char **argv){
         *error = 0;
 
         /* Reading a single problem and creating a board for it */
-        tiles = readFile(fileIn, error);
+        board = getBoard(fileIn, error);
+
         /* Checking if the problem is invalid or not */
         if (*error == 1) {
             /* Writing the problem header and moving on to the next problem after freeing the board */
             fprintf(fileOut, "%i %i %i %i %i\n\n", 
-                    tiles->lines, tiles->columns, tiles->variant, tiles->l, tiles->c);
-            freeBoard(tiles);
+                    board->lines, board->columns, board->variant, board->l, board->c);
+
+            freeBoard(board);
             continue;
         }
         // check for end of file
-        if (!tiles) break;
+        if (!board) break;
 
         /* Creating a cluster with the tile in the problem */
-        cluster = findTileCluster(tiles, tiles->l, tiles->c);
+        cluster = findCluster(board, board->l, board->c);
+
         /* Getting either the score of the cluster or removing depending on what the problem wants */
-        if (tiles->variant == 1) score = getScore(cluster);
-        else if (tiles->variant == 2) removeCluster(tiles, cluster); 
+        if (board->variant == 1) score = getScore(cluster);
+        else if (board->variant == 2) removeCluster(board, cluster); 
+
         /* Writing to the output file */
-        writeFile(fileOut, tiles, score);
+        writeFile(fileOut, board, score);
+
         /* Freeing the board and the cluster as they are no longer necessary */
         freeCluster(cluster);
-        freeBoard(tiles);
+        freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */
     free(error);
     free(filenameOut);
+
     fclose(fileIn);
     fclose(fileOut);
     return 0;
