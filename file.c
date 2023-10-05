@@ -63,8 +63,7 @@ char *outputName(char *inputName) {
     name = (char *) malloc((len + 1) * sizeof(char));
     strcpy(name, inputName);
 
-    extension = strstr(name, ".tilewalls1");
-    if (!extension) {free(name); return NULL;}
+    extension = name + len - 11;
     memcpy(extension, ".singlestep", 11);
 
     return name;
