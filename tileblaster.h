@@ -11,10 +11,9 @@ typedef struct _board {
 
     int variant;
 
-    int c, l;
+    int l, c;
 
     int **tiles;
-    uint *clusterSets;
 
 } Board;
 
@@ -29,8 +28,9 @@ typedef struct _cellList{
 
 Board* getBoard(FILE *file, int *error);
 
-CellList *findCluster(Board*, int line, int column);
+int findCluster(Board*, int line, int column, int color);
 void removeCluster(Board *board, CellList *head); 
+void applyGravity(Board*);
 
 uint getScore(CellList *head);
 void showBoard(Board*);

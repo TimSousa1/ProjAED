@@ -38,16 +38,10 @@ Board *getBoard(FILE *file, int *error){
             fscanf(file, "%i", &board->tiles[i][j]);
         }
     }
-    /* Initializing the clusterSets array*/
-    board->clusterSets = (uint *) malloc (sizeof(uint) * board->lines * board->columns);
-    for (uint i = 0; i < board->lines * board->columns; i++){
-        board->clusterSets[i] = i;
-    }
     /* Checking if the problem is invalid or not */
     if (board->variant < 1 || board->variant > 2 || board->l < 1 ||
         board->c < 1 || board->l > board->lines || board->c > board->columns) {
         *error = 1;
-        return board;
     }
     /* Returns the board created */
     return board;

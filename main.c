@@ -50,19 +50,23 @@ int main(int argc, char **argv){
         }
         // check for end of file
         if (!board) break;
+        applyGravity(board);
 
         /* Creating a cluster with the tile in the problem */
-        cluster = findCluster(board, board->l, board->c);
+        int color = board->tiles[board->l -1][board->c - 1];
 
-        /* Getting either the score of the cluster or removing depending on what the problem wants */
-        if (board->variant == 1) score = getScore(cluster);
-        else if (board->variant == 2) removeCluster(board, cluster); 
+        score = findCluster(board, board->l, board->c, color);
+        score = score * (score - 1);
+
+        // if it's only one tile revert the -1 tranformation
+        if (score == 0) board->tiles[board->l -1][board->c - 1] = color;
+
+        if (board->variant == 2)
+            applyGravity(board);
 
         /* Writing to the output file */
         writeFile(fileOut, board, score);
 
-        /* Freeing the board and the cluster as they are no longer necessary */
-        freeCluster(cluster);
         freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */
