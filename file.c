@@ -18,8 +18,8 @@ Board *getBoard(FILE *file, int *error){
     Board *board = (Board *) malloc (sizeof(Board));
 
     // getting the header of the problem
-    if (fscanf(file, "%i %i %i %i %i",
-        &board->lines, &board->columns, &board->variant, &board->l, &board->c) != 5) {
+    if (fscanf(file, "%i %i %i",
+        &board->lines, &board->columns, &board->variant) != 3) {
             free(board);
             return NULL;    
     } 
@@ -27,27 +27,23 @@ Board *getBoard(FILE *file, int *error){
     
     // initializing the board matrix
     board->tiles = (int **) malloc (board->lines * sizeof(int *));
+    board->clusterSets = (uint*) malloc (board->lines * board->columns * sizeof(uint));
 
     for (uint k = 0; k < board->lines; k++) {
         board->tiles[k] = (int *) malloc (board->columns * sizeof(int));
     }
 
     // getting every element off of the file
-    for (int i = board->lines - 1; i >= 0; i--){
+    for (int i = board->lines - 1, id = 0; i >= 0; i--){
         for (int j = 0; j < board->columns; j++){
             fscanf(file, "%i", &board->tiles[i][j]);
+            board->clusterSets[id] = id;
+            id++;
         }
     }
-    /* Initializing the clusterSets array*/
-    board->clusterSets = (uint *) malloc (sizeof(uint) * board->lines * board->columns);
-    for (uint i = 0; i < board->lines * board->columns; i++){
-        board->clusterSets[i] = i;
-    }
     /* Checking if the problem is invalid or not */
-    if (board->variant < 1 || board->variant > 2 || board->l < 1 ||
-        board->c < 1 || board->l > board->lines || board->c > board->columns) {
+    if (board->variant != -1 && board->variant != -3 && board->variant < 0) {
         *error = 1;
-        return board;
     }
     /* Returns the board created */
     return board;
@@ -61,11 +57,11 @@ char *outputName(char *inputName) {
 
     len = strlen(inputName);
 
-    name = (char *) malloc((len + 1) * sizeof(char));
+    name = (char *) malloc((len + 2) * sizeof(char));
     strcpy(name, inputName);
 
-    extension = name + len - 11;
-    memcpy(extension, ".singlestep", 11);
+    extension = name + len - 10;
+    memcpy(extension, ".toleblists", 11);
 
     return name;
 }
@@ -80,26 +76,18 @@ char *outputName(char *inputName) {
  * Description: writes to the output file the answer to the problem according to its variant
  *****************************************************************************/
 
-void writeFile(FILE *file, Board *board, uint score) {
+void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score) {
 
-    int i, j;
+    uint moves;
+    MoveList *move;
 
     /* Writing the problem header */
-    fprintf(file, "%i %i %i %i %i\n",
-                board->lines, board->columns, board->variant, board->l, board->c);
-
-    /* Checking the problem variant to see what to write, if it's 1 it writes the score, otherwise 
-    * writes the matrix*/ 
-    if (board->variant == 1)
-        fprintf(file, "%u\n", score);
-
-    else if (board->variant == 2) {
-        for (i = board->lines - 1; i >= 0; i--) {
-            for (j = 0; j < board->columns; j++) {
-                fprintf(file, "%i ", board->tiles[i][j]);
-            }
-            fprintf(file, "\n");
-        } 
+    fprintf(file, "%i %i %i\n",
+                board->lines, board->columns, board->variant);
+    for (moves = 0, move = allMoves; move; move = move->next, moves++);
+    fprintf(file, "%i %i", moves, score);
+    for (move = allMoves; move; move = move->next) {
+        fprintf(file, "%i %i", move->line, move->column);
     }
     fprintf(file, "\n");
 

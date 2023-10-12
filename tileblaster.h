@@ -11,34 +11,31 @@ typedef struct _board {
 
     int variant;
 
-    int c, l;
-
     int **tiles;
     uint *clusterSets;
 
 } Board;
 
-typedef struct _cellList{
+typedef struct _moveList{
     int line;
     int column;
-    int color;
 
-    struct _cellList *next;
-} CellList;
+    struct _moveList *next;
+} MoveList;
 
 
 Board* getBoard(FILE *file, int *error);
 
-CellList *findCluster(Board*, int line, int column);
-void removeCluster(Board *board, CellList *head); 
+int findCluster(Board*, int line, int column, int color, uint originalID);
+int findAllClusters(Board*);
+void applyGravity(Board*);
 
-uint getScore(CellList *head);
 void showBoard(Board*);
+void showID(Board*);
 
 char *outputName(char *inputName);
-void writeFile(FILE *file, Board *board, uint score);
+void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score);
 
 void freeBoard(Board *board);
-void freeCluster(CellList *head);
 
 #endif
