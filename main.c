@@ -32,16 +32,16 @@ int main(int argc, char **argv){
     Board *board;
     MoveList *moveList;
     
-    while (1){
+    error = 0;
+    while ((board = getBoard(fileIn, &error))){
         /* Reseting error */
         total = 0;
-        error = 0;
 
         /* Reading a single problem and creating a board for it */
-        board = getBoard(fileIn, &error);
 
         /* Checking if the problem is invalid or not */
         if (error == 1) {
+            error = 0;
             /* Writing the problem header and moving on to the next problem after freeing the board */
             fprintf(fileOut, "%i %i %i\n\n", 
                     board->lines, board->columns, board->variant);
@@ -49,22 +49,15 @@ int main(int argc, char **argv){
             freeBoard(board);
             continue;
         }
-        // check for end of file
-        if (!board) break;
-        applyGravity(board);
+        error = 0;
 
-        color = board->tiles[line-1][column-1];
-        score = findCluster(board, line, column, color);
-        total += score * (score - 1);
-
-        // if it's only one tile revert the -1 tranformation
-        if (score == 0) board->tiles[line-1][column-1] = color;
-
-        if (board->variant == 2)
-            applyGravity(board);
-
+        while (findAllClusters(board) > 0){
+            showBoard(board);
+            showID(board);
+            break;
+        }
         /* Writing to the output file */
-        writeFile(fileOut, board, moveList, score);
+        //writeFile(fileOut, board, moveList, score);
 
         freeBoard(board);
     }

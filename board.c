@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void applyGravity(Board *board);
+uint convert(int line, int column, int maxColumn);
 
 /******************************************************************************
  * findCluster ()
@@ -14,27 +14,68 @@ void applyGravity(Board *board);
  * Description: Groups the tile provided as an argument in a cluster
  *****************************************************************************/
 
-int findCluster(Board *board, int line, int column, int clusterColor){
+int findCluster(Board *board, int line, int column, int clusterColor, uint originalID){
+    printf("finding cluster on tile (%i %i)..\n", line, column);
     if (line > board->lines || line <= 0 ||
             column > board->columns || column <= 0)
-        return 0;
+    {printf("tile out of bounds!\n");return 0;}
 
     int color;
     color = board->tiles[line - 1][column - 1];
     
-    if (color != clusterColor || color == -1) return 0;
+    // checking if:
+    // the color is the same
+    // already belongs in the same cluster
+    // its the first tile being checked
+    uint id = convert(line, column, board->columns);
+    if (color != clusterColor || color == -1)
+    {printf("tile already on set or empty!\n");return 0;}
 
-    board->tiles[line - 1][column - 1] = -1;
-    int score;
-    score = 1;
-    score += findCluster(board, line + 1, column, clusterColor); // up
-    score += findCluster(board, line - 1, column, clusterColor); // down
-    score += findCluster(board, line, column - 1, clusterColor); // left
-    score += findCluster(board, line, column + 1, clusterColor); //right
+    int tilesInCluster;
+    tilesInCluster = 1;
+    board->clusterSets[id] = originalID;
+    printf("adding tile to clusterSet..\n");
 
-    return score;
+    // temporarily making the tile unavailable
+    board->tiles[line-1][column-1] = -1;
+
+    tilesInCluster += findCluster(board, line + 1, column, clusterColor, originalID); // up
+    tilesInCluster += findCluster(board, line - 1, column, clusterColor, originalID); // down
+    tilesInCluster += findCluster(board, line, column - 1, clusterColor, originalID); // left
+    tilesInCluster += findCluster(board, line, column + 1, clusterColor, originalID); //right
+
+    // reassigning the tile its original color
+    board->tiles[line-1][column-1] = color;
+
+    return tilesInCluster;
 }
 
+int findAllClusters(Board* board){
+    printf("initializing search for all clusters..\n");
+    int clusterAvailable = 0;
+    int color;
+    uint id;
+
+    for (uint line = board->lines; line > 0; line--){
+        for (uint column = 1; column <= board->columns; column++){
+            printf("on tile (%i %i)\n", line, column);
+            color = board->tiles[line-1][column-1];
+            id = convert(line, column, board->columns);
+            printf("if of current tile is %u\n", id);
+            if (id == board->clusterSets[id]){
+                printf("tile not on a clusterSet!\n");
+                clusterAvailable = findCluster(board, line, column, color, id);
+                clusterAvailable += clusterAvailable * (clusterAvailable -1);
+            }
+        }
+    }
+
+    return clusterAvailable;
+}
+
+uint convert(int line, int column, int maxColumn){
+    return (line - 1) * maxColumn + column -1;
+}
 
 void applyGravity(Board *board) {
 
@@ -94,6 +135,16 @@ void showBoard(Board *board){
     for (int i = board->lines - 1; i >= 0; i--) {
         for (int j = 0; j < board->columns; j++) {
             fprintf(stdout, "%i ", board->tiles[i][j]);
+        }
+        fprintf(stdout, "\n");
+    } 
+    fprintf(stdout, "\n");
+}
+
+void showID(Board* board){
+    for (int line = board->lines; line > 0; line--) {
+        for (int column = 1; column <= board->columns; column++) {
+            fprintf(stdout, "%4i ", board->clusterSets[convert(line, column, board->columns)]);
         }
         fprintf(stdout, "\n");
     } 

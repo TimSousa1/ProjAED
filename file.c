@@ -27,15 +27,18 @@ Board *getBoard(FILE *file, int *error){
     
     // initializing the board matrix
     board->tiles = (int **) malloc (board->lines * sizeof(int *));
+    board->clusterSets = (uint*) malloc (board->lines * board->columns * sizeof(uint));
 
     for (uint k = 0; k < board->lines; k++) {
         board->tiles[k] = (int *) malloc (board->columns * sizeof(int));
     }
 
     // getting every element off of the file
-    for (int i = board->lines - 1; i >= 0; i--){
+    for (int i = board->lines - 1, id = 0; i >= 0; i--){
         for (int j = 0; j < board->columns; j++){
             fscanf(file, "%i", &board->tiles[i][j]);
+            board->clusterSets[id] = id;
+            id++;
         }
     }
     /* Checking if the problem is invalid or not */
@@ -58,7 +61,7 @@ char *outputName(char *inputName) {
     strcpy(name, inputName);
 
     extension = name + len - 10;
-    memcpy(extension, ".tileblasts", 11);
+    memcpy(extension, ".toleblists", 11);
 
     return name;
 }
