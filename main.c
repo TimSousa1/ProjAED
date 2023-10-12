@@ -13,7 +13,7 @@ int main(int argc, char **argv){
 
     /* Allocating memory to know if there are any problems with the problem format */
     int *error = (int *) malloc(sizeof(int));
-    uint score;
+    uint score, line, column;
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
     char *filenameOut;
@@ -42,8 +42,8 @@ int main(int argc, char **argv){
         /* Checking if the problem is invalid or not */
         if (*error == 1) {
             /* Writing the problem header and moving on to the next problem after freeing the board */
-            fprintf(fileOut, "%i %i %i %i %i\n\n", 
-                    board->lines, board->columns, board->variant, board->l, board->c);
+            fprintf(fileOut, "%i %i %i\n\n", 
+                    board->lines, board->columns, board->variant);
 
             freeBoard(board);
             continue;
@@ -53,13 +53,13 @@ int main(int argc, char **argv){
         applyGravity(board);
 
         /* Creating a cluster with the tile in the problem */
-        int color = board->tiles[board->l -1][board->c - 1];
+        int color = board->tiles[line][column-1];
 
-        score = findCluster(board, board->l, board->c, color);
+        score = findCluster(board, line, column, color);
         score = score * (score - 1);
 
         // if it's only one tile revert the -1 tranformation
-        if (score == 0) board->tiles[board->l -1][board->c - 1] = color;
+        if (score == 0) board->tiles[line-1][column-1] = color;
 
         if (board->variant == 2)
             applyGravity(board);

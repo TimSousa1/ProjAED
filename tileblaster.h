@@ -11,8 +11,6 @@ typedef struct _board {
 
     int variant;
 
-    int l, c;
-
     int **tiles;
 
 } Board;

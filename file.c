@@ -18,8 +18,8 @@ Board *getBoard(FILE *file, int *error){
     Board *board = (Board *) malloc (sizeof(Board));
 
     // getting the header of the problem
-    if (fscanf(file, "%i %i %i %i %i",
-        &board->lines, &board->columns, &board->variant, &board->l, &board->c) != 5) {
+    if (fscanf(file, "%i %i %i",
+        &board->lines, &board->columns, &board->variant) != 3) {
             free(board);
             return NULL;    
     } 
@@ -39,8 +39,7 @@ Board *getBoard(FILE *file, int *error){
         }
     }
     /* Checking if the problem is invalid or not */
-    if (board->variant < 1 || board->variant > 2 || board->l < 1 ||
-        board->c < 1 || board->l > board->lines || board->c > board->columns) {
+    if (board->variant != -1 && board->variant != -3 && board->variant < 0) {
         *error = 1;
     }
     /* Returns the board created */
@@ -55,11 +54,11 @@ char *outputName(char *inputName) {
 
     len = strlen(inputName);
 
-    name = (char *) malloc((len + 1) * sizeof(char));
+    name = (char *) malloc((len + 2) * sizeof(char));
     strcpy(name, inputName);
 
-    extension = name + len - 11;
-    memcpy(extension, ".singlestep", 11);
+    extension = name + len - 10;
+    memcpy(extension, ".tileblasts", 11);
 
     return name;
 }
@@ -79,8 +78,8 @@ void writeFile(FILE *file, Board *board, uint score) {
     int i, j;
 
     /* Writing the problem header */
-    fprintf(file, "%i %i %i %i %i\n",
-                board->lines, board->columns, board->variant, board->l, board->c);
+    fprintf(file, "%i %i %i\n",
+                board->lines, board->columns, board->variant);
 
     /* Checking the problem variant to see what to write, if it's 1 it writes the score, otherwise 
     * writes the matrix*/ 
