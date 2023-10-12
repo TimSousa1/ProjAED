@@ -15,28 +15,24 @@ typedef struct _board {
 
 } Board;
 
-typedef struct _cellList{
+typedef struct _moveList{
     int line;
     int column;
-    int color;
 
-    struct _cellList *next;
-} CellList;
+    struct _moveList *next;
+} MoveList;
 
 
 Board* getBoard(FILE *file, int *error);
 
 int findCluster(Board*, int line, int column, int color);
-void removeCluster(Board *board, CellList *head); 
 void applyGravity(Board*);
 
-uint getScore(CellList *head);
 void showBoard(Board*);
 
 char *outputName(char *inputName);
-void writeFile(FILE *file, Board *board, uint score);
+void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score);
 
 void freeBoard(Board *board);
-void freeCluster(CellList *head);
 
 #endif

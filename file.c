@@ -73,26 +73,18 @@ char *outputName(char *inputName) {
  * Description: writes to the output file the answer to the problem according to its variant
  *****************************************************************************/
 
-void writeFile(FILE *file, Board *board, uint score) {
+void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score) {
 
-    int i, j;
+    uint moves;
+    MoveList *move;
 
     /* Writing the problem header */
     fprintf(file, "%i %i %i\n",
                 board->lines, board->columns, board->variant);
-
-    /* Checking the problem variant to see what to write, if it's 1 it writes the score, otherwise 
-    * writes the matrix*/ 
-    if (board->variant == 1)
-        fprintf(file, "%u\n", score);
-
-    else if (board->variant == 2) {
-        for (i = board->lines - 1; i >= 0; i--) {
-            for (j = 0; j < board->columns; j++) {
-                fprintf(file, "%i ", board->tiles[i][j]);
-            }
-            fprintf(file, "\n");
-        } 
+    for (moves = 0, move = allMoves; move; move = move->next, moves++);
+    fprintf(file, "%i %i", moves, score);
+    for (move = allMoves; move; move = move->next) {
+        fprintf(file, "%i %i", move->line, move->column);
     }
     fprintf(file, "\n");
 

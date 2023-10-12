@@ -2,9 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-CellList *createCell(Board *board, int line, int column, uint id, int color);
-void listAdd(CellList *element, CellList *toAdd);
 void applyGravity(Board *board);
 
 /******************************************************************************
