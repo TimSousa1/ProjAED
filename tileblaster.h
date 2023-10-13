@@ -28,7 +28,11 @@ Board* getBoard(FILE *file, int *error);
 
 int findCluster(Board*, int line, int column, int color, uint originalID);
 int findAllClusters(Board*);
+uint removeCluster(Board *board, uint line, uint column);
 void applyGravity(Board*);
+
+MoveList *moveListAdd(MoveList *head, uint line, uint column);
+void freeMoveList(MoveList *head);
 
 void showBoard(Board*);
 void showID(Board*);

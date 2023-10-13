@@ -85,9 +85,9 @@ void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score) {
     fprintf(file, "%i %i %i\n",
                 board->lines, board->columns, board->variant);
     for (moves = 0, move = allMoves; move; move = move->next, moves++);
-    fprintf(file, "%i %i", moves, score);
+    fprintf(file, "%i %i\n", moves, score);
     for (move = allMoves; move; move = move->next) {
-        fprintf(file, "%i %i", move->line, move->column);
+        fprintf(file, "%i %i\n", move->line, move->column);
     }
     fprintf(file, "\n");
 

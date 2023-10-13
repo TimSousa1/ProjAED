@@ -12,8 +12,8 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     /* Allocating memory to know if there are any problems with the problem format */
-    int error, color;
-    uint total, score, line, column;
+    int error, color, id;
+    uint total, score, line, column, tiles;
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
     char *filenameOut;
@@ -30,7 +30,7 @@ int main(int argc, char **argv){
     if (!fileIn || !fileOut) return ERROR_FILE;
     
     Board *board;
-    MoveList *moveList;
+    MoveList *moveHead;
     
     error = 0;
     while ((board = getBoard(fileIn, &error))){
@@ -50,15 +50,23 @@ int main(int argc, char **argv){
             continue;
         }
         error = 0;
+        moveHead = NULL;
+        while ((id = findAllClusters(board)) != -1){
+            //showboard(board);
+            //showID(board);
 
-        while (findAllClusters(board) > 0){
-            showBoard(board);
-            showID(board);
-            break;
+            line = id / board->columns + 1;
+            column = id % board->columns + 1;
+            //printf("%i %i %i\n", id, line, column);
+            tiles = removeCluster(board, line, column);
+            moveHead = moveListAdd(moveHead, line, column);
+            score += tiles * (tiles - 1);
+            //showBoard(board);
+            //showID(board);
         }
         /* Writing to the output file */
-        //writeFile(fileOut, board, moveList, score);
-
+        writeFile(fileOut, board, moveHead, score);
+        freeMoveList(moveHead);
         freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */
