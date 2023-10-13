@@ -7,3 +7,6 @@ compile:
 
 clean::
 	rm *.o tileblaster
+
+run::
+	./tileblaster ../tiles/Primeiro_milho/Primeiro_milho02.tilewalls

@@ -23,21 +23,20 @@ Board *getBoard(FILE *file, int *error){
             free(board);
             return NULL;    
     } 
-    /* Checking if the problem is invalid or not */
+    board->score = 0;
     
     // initializing the board matrix
-    board->tiles = (int **) malloc (board->lines * sizeof(int *));
-    board->clusterSets = (uint*) malloc (board->lines * board->columns * sizeof(uint));
+    board->tiles = (Vector2 **) malloc (board->lines * sizeof(Vector2 *));
 
     for (uint k = 0; k < board->lines; k++) {
-        board->tiles[k] = (int *) malloc (board->columns * sizeof(int));
+        board->tiles[k] = (Vector2 *) malloc (board->columns * sizeof(Vector2));
     }
 
     // getting every element off of the file
-    for (int i = board->lines - 1, id = 0; i >= 0; i--){
-        for (int j = 0; j < board->columns; j++){
-            fscanf(file, "%i", &board->tiles[i][j]);
-            board->clusterSets[id] = id;
+    for (int line = board->lines - 1, id = 0; line >= 0; line--){
+        for (int column = 0; column < board->columns; column++){
+            fscanf(file, "%i", &board->tiles[line][column].x);
+            board->tiles[line][column].y = id;
             id++;
         }
     }
@@ -46,6 +45,7 @@ Board *getBoard(FILE *file, int *error){
         *error = 1;
     }
     /* Returns the board created */
+    printf("got a new board!\n");
     return board;
 }
 

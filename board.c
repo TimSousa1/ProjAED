@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 uint convert(int line, int column, int maxColumn);
-void resetClusterSets(uint *clusterSets, uint maxSize);
-void applyGravity(Board *board);
 
 /******************************************************************************
  * findCluster ()
@@ -17,29 +16,24 @@ void applyGravity(Board *board);
  *****************************************************************************/
 
 int findCluster(Board *board, int line, int column, int clusterColor, uint originalID){
-    //printf("finding cluster on tile (%i %i)..\n", line, column);
+    printf("finding cluster on tile (%i %i)..\n", line, column);
     if (line > board->lines || line <= 0 ||
             column > board->columns || column <= 0)
     {/*printf("tile out of bounds!\n");*/return 0;}
 
     int color;
-    color = board->tiles[line - 1][column - 1];
+    color = board->tiles[line - 1][column - 1].x;
     
-    // checking if:
-    // the color is the same
-    // already belongs in the same cluster
-    // its the first tile being checked
-    uint id = convert(line, column, board->columns);
     if (color != clusterColor || color == -1)
     {/*printf("tile already on set or empty!\n");*/return 0;}
 
     int tilesInCluster;
     tilesInCluster = 1;
-    board->clusterSets[id] = originalID;
-    //printf("adding tile to clusterSet..\n");
+    board->tiles[line - 1][column - 1].y = originalID;
+    printf("adding tile to clusterSet..\n");
 
     // temporarily making the tile unavailable
-    board->tiles[line-1][column-1] = -1;
+    board->tiles[line-1][column-1].x = -1;
 
     tilesInCluster += findCluster(board, line + 1, column, clusterColor, originalID); // up
     tilesInCluster += findCluster(board, line - 1, column, clusterColor, originalID); // down
@@ -47,60 +41,108 @@ int findCluster(Board *board, int line, int column, int clusterColor, uint origi
     tilesInCluster += findCluster(board, line, column + 1, clusterColor, originalID); //right
 
     // reassigning the tile its original color
-    board->tiles[line-1][column-1] = color;
+    board->tiles[line-1][column-1].x = color;
 
     return tilesInCluster;
 }
 
-int findAllClusters(Board* board){
-    //printf("initializing search for all clusters..\n");
-    int tilesInCluster, biggestId = -1;
+void findAllClusters(Board* board){
+    printf("initializing search for all clusters..\n");
+    int tilesInCluster;
     int color;
-    uint id, biggestCluster = 1;
+    uint id;
 
     for (uint line = board->lines; line > 0; line--){
         for (uint column = 1; column <= board->columns; column++){
-            //printf("on tile (%i %i)\n", line, column);
-            color = board->tiles[line-1][column-1];
+            printf("on tile (%i %i)\n", line, column);
+            color = board->tiles[line-1][column-1].x;
             id = convert(line, column, board->columns);
-            //printf("if of current tile is %u\n", id);
-            if (id == board->clusterSets[id]){
-                //printf("tile not on a clusterSet!\n");
+            printf("if of current tile is %u\n", id);
+            if (id == board->tiles[line-1][column-1].y){
+                printf("tile not on a clusterSet!\n");
                 tilesInCluster = findCluster(board, line, column, color, id);
-                if (tilesInCluster > biggestCluster) { 
-                    biggestCluster = tilesInCluster;
-                    biggestId = id;
-                }
             }
         }
     }
-    return biggestId;
+    return;
+}
+
+// searches for the fist cluster from top left to right
+int findTopSweep(Board* board){
+    int color, id;
+    int tilesInCluster;
+
+    for (uint line = board->lines; line > 0; line--){
+        for (uint column = 1; column <= board->columns; column++){
+            color = board->tiles[line-1][column-1].x;
+            id = board->tiles[line-1][column-1].y;
+            tilesInCluster = findCluster(board, line, column, color, id);
+            if (tilesInCluster > 1) return id;
+        }
+    }
+    return -1;
+}
+
+// searches for the first cluster from bottom left to right
+int findBottomSweep(Board* board){
+    int color, id;
+    int tilesInCluster;
+
+    for (uint line = 1; line <= board->lines; line++){
+        for (uint column = 1; column <= board->columns; column++){
+            color = board->tiles[line-1][column-1].x;
+            id = board->tiles[line-1][column-1].y;
+            tilesInCluster = findCluster(board, line, column, color, id);
+            if (tilesInCluster > 1) return id;
+        }
+    }
+    return -1;
+}
+
+int findLargest(Board* board){
+    int color, id, largerID = -1;
+    int tilesInCluster, tilesInBiggestCluster = 1;
+
+    for (uint line = 1; line <= board->lines; line++){
+        for (uint column = 1; column <= board->columns; column++){
+            color = board->tiles[line-1][column-1].x;
+            id = board->tiles[line-1][column-1].y;
+
+            tilesInCluster = findCluster(board, line, column, color, id);
+            if (tilesInCluster > tilesInBiggestCluster){
+                tilesInBiggestCluster = tilesInCluster;
+                largerID = id;
+            }
+        }
+    }
+    return largerID;
 }
 
 uint convert(int line, int column, int maxColumn){
     return (line - 1) * maxColumn + column -1;
 }
 
-uint removeCluster(Board *board, uint line, uint column) {
+uint removeCluster(Board *board, int id) {
 
-    uint id = board->clusterSets[convert(line, column, board->columns)];
     uint totalTiles = 0;
 
     for (uint line = 1; line <= board->lines; line++) {
         for (uint column = 1; column <= board->columns; column++) {
-            if (board->clusterSets[convert(line, column, board->columns)] == id) {
-                board->tiles[line - 1][column - 1] = -1;
+            if (board->tiles[line-1][column-1].y == id) {
+                board->tiles[line - 1][column - 1].x = -1;
                 totalTiles++;
             }
         }
     }
-    resetClusterSets(board->clusterSets, board->lines * board->columns);
-    applyGravity(board);
     return totalTiles;
 }
 
-void resetClusterSets(uint *clusterSets, uint maxSize) {
-    for (uint id = 0; id < maxSize; id++) clusterSets[id] = id;
+void resetClusterSets(Board* board) {
+    for (uint line = 1; line <= board->lines; line++) {
+        for (uint column = 1; column <= board->columns; column++) {
+            board->tiles[line-1][column-1].y = convert(line, column, board->columns);
+        }
+    }
 }
 
 void applyGravity(Board *board) {
@@ -114,12 +156,12 @@ void applyGravity(Board *board) {
         for (line = 0; line < board->lines; line++) {
 
             /* Counting the number of empty tiles */
-            if (board->tiles[line][column] == -1) {
+            if (board->tiles[line][column].x == -1) {
                 counter++;
             /* Making a tile fall */
             } else if (counter) {
-                board->tiles[line - counter][column] = board->tiles[line][column];
-                board->tiles[line][column] = -1;
+                board->tiles[line - counter][column].x = board->tiles[line][column].x;
+                board->tiles[line][column].x = -1;
             }
         }
     }
@@ -128,13 +170,13 @@ void applyGravity(Board *board) {
     counter = 0;
     for (column = board->columns - 1; column >= 0; column--) {
         /* Counting the number of empty columns */
-        if (board->tiles[0][column] == -1) {
+        if (board->tiles[0][column].x == -1) {
             counter++;
         /* Sliding a column to the right */
         } else if (counter) {
             for (line = 0; line < board->lines; line++) {
-                board->tiles[line][column + counter] = board->tiles[line][column];
-                board->tiles[line][column] = -1;
+                board->tiles[line][column + counter].x = board->tiles[line][column].x;
+                board->tiles[line][column].x = -1;
             }
         }
     }
@@ -150,7 +192,6 @@ void freeBoard(Board *board) {
         free(board->tiles[i]);
     }
     free(board->tiles);
-    free(board->clusterSets);
     /* Freeing the memory allocated for the board */
     free(board);
 
@@ -160,7 +201,7 @@ void freeBoard(Board *board) {
 void showBoard(Board *board){
     for (int i = board->lines - 1; i >= 0; i--) {
         for (int j = 0; j < board->columns; j++) {
-            fprintf(stdout, "%i ", board->tiles[i][j]);
+            fprintf(stdout, "%4i ", board->tiles[i][j].x);
         }
         fprintf(stdout, "\n");
     } 
@@ -170,7 +211,7 @@ void showBoard(Board *board){
 void showID(Board* board){
     for (int line = board->lines; line > 0; line--) {
         for (int column = 1; column <= board->columns; column++) {
-            fprintf(stdout, "%4i ", board->clusterSets[convert(line, column, board->columns)]);
+            fprintf(stdout, "%4i ", board->tiles[line-1][column-1].y);
         }
         fprintf(stdout, "\n");
     } 
