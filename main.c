@@ -12,8 +12,9 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     /* Allocating memory to know if there are any problems with the problem format */
-    int error, color;
-    uint total, score, line, column;
+    int error, color, id;
+    uint total, score, line, column, tiles;
+
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
     char *filenameOut;
@@ -30,18 +31,18 @@ int main(int argc, char **argv){
     if (!fileIn || !fileOut) return ERROR_FILE;
     
     Board *board;
-    MoveList *moveList;
+    MoveList *moveHead;
     
     error = 0;
+    /* Reading a single problem and creating a board for it */
     while ((board = getBoard(fileIn, &error))){
         /* Reseting error */
         total = 0;
 
-        /* Reading a single problem and creating a board for it */
-
         /* Checking if the problem is invalid or not */
         if (error == 1) {
             error = 0;
+
             /* Writing the problem header and moving on to the next problem after freeing the board */
             fprintf(fileOut, "%i %i %i\n\n", 
                     board->lines, board->columns, board->variant);
@@ -50,15 +51,27 @@ int main(int argc, char **argv){
             continue;
         }
         error = 0;
+        moveHead = NULL;
+        while (1){
+            //showboard(board);
+            //showID(board);
 
-        while (findAllClusters(board) > 0){
+            id = findTopSweep(board);
+            if (id == -1) break;
+
+            tiles = removeCluster(board, id);
+            resetClusterSets(board);
+
+            applyGravity(board);
+            moveHead = moveListAdd(moveHead, line, column);
+            board->score += tiles * (tiles - 1);
             showBoard(board);
+            printf("score: %i\n", board->score);
             showID(board);
-            break;
         }
         /* Writing to the output file */
-        //writeFile(fileOut, board, moveList, score);
-
+        writeFile(fileOut, board, moveHead, score);
+        freeMoveList(moveHead);
         freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */
