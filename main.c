@@ -52,23 +52,10 @@ int main(int argc, char **argv){
         }
         error = 0;
         moveHead = NULL;
-        while (1){
-            //showboard(board);
-            //showID(board);
+        if (board->variant == -1) solveVariant1(board);
+        else if (board->variant == -3 && board->variant >= 0) solveVariant2or3();
 
-            id = findTopSweep(board);
-            if (id == -1) break;
-
-            tiles = removeCluster(board, id);
-            resetClusterSets(board);
-
-            applyGravity(board);
-            moveHead = moveListAdd(moveHead, line, column);
-            board->score += tiles * (tiles - 1);
-            showBoard(board);
-            printf("score: %i\n", board->score);
-            showID(board);
-        }
+        
         /* Writing to the output file */
         writeFile(fileOut, board, moveHead, score);
         freeMoveList(moveHead);

@@ -122,19 +122,31 @@ uint convert(int line, int column, int maxColumn){
     return (line - 1) * maxColumn + column -1;
 }
 
-uint removeCluster(Board *board, int id) {
+MoveList *removeCluster(Board *board, int id) {
 
     uint totalTiles = 0;
+    int color;
+    MoveList *move = (MoveList *) malloc(sizeof(MoveList));
+
+    move->id = id;
+    move->color = board->tiles
 
     for (uint line = 1; line <= board->lines; line++) {
         for (uint column = 1; column <= board->columns; column++) {
             if (board->tiles[line-1][column-1].y == id) {
+                color = board->tiles[line-1][column-1].x;
                 board->tiles[line - 1][column - 1].x = -1;
                 totalTiles++;
             }
         }
     }
-    return totalTiles;
+
+    move->id = id;
+    move->color = color;
+    move->score = totalTiles * (totalTiles - 1);
+    move->previous = NULL;
+    move->next = NULL;
+    return move;
 }
 
 void resetClusterSets(Board* board) {
@@ -145,9 +157,10 @@ void resetClusterSets(Board* board) {
     }
 }
 
-void applyGravity(Board *board) {
+TileList *applyGravity(Board *board) {
 
     int line, column, counter;
+    TileList *headTile = NULL;
     
     /* Simulating vertical gravity */
     for (column = 0; column < board->columns; column++) {
@@ -160,6 +173,7 @@ void applyGravity(Board *board) {
                 counter++;
             /* Making a tile fall */
             } else if (counter) {
+                addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column, line - counter});
                 board->tiles[line - counter][column].x = board->tiles[line][column].x;
                 board->tiles[line][column].x = -1;
             }
@@ -175,12 +189,16 @@ void applyGravity(Board *board) {
         /* Sliding a column to the right */
         } else if (counter) {
             for (line = 0; line < board->lines; line++) {
+                addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column + counter, line});
+
+                //We havent tried anything yet
+
                 board->tiles[line][column + counter].x = board->tiles[line][column].x;
                 board->tiles[line][column].x = -1;
             }
         }
     }
-    return;
+    return headTile;
 }
 
 

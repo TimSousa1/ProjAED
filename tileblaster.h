@@ -21,13 +21,24 @@ typedef struct _board {
 
 } Board;
 
-typedef struct _moveList{
-    int line;
-    int column;
+typedef struct _tileList{
+    Vector2 initPos;
+    Vector2 finalPos;
 
+    struct _tileList *next;
+} TileList;
+
+typedef struct _moveList {
+    Vector2 tile;
+    int color;
+    int id;
+    int score;
+
+    TileList *tileHead;
+
+    struct _moveList *previous;
     struct _moveList *next;
-} MoveList;
-
+} MoveList
 
 Board* getBoard(FILE *file, int *error);
 void freeBoard(Board *board);
