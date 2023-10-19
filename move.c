@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos) {
+TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos) {
 
     TileList *tile = (TileList *) malloc(sizeof(TileList));
 
@@ -16,28 +16,35 @@ void addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos) {
         tile->next = head->next;
         head->next = tile;
     }
+    return head;
 }
 
 void revertMove(Board *board, MoveList* lastMove) {
 
-    tileList *currentTile, *tmp;
+    TileList *currentTile, *tmp;
+    uint line, column;
 
-    for (currentTile = lastMove->tileHead; currentTile; currentTile = currentTile->next) {
-        board->tiles[currentTile->initPos.y][currentTile->initPos.x].x = board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x;
-        board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x = lastMove->color;
-    }
     for (currentTile = lastMove->tileHead; currentTile;) {
+        board->tiles[currentTile->initPos.y][currentTile->initPos.x].x = board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x;
+        board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x = -1;
         tmp = currentTile;
         currentTile = currentTile->next;
         free(tmp);
     }
-    lastMove->previous->next = NULL;
+    for (uint line = 0; line < board->lines; line++) {
+        for (uint column = 0; column < board->columns; column++) {
+            if (board->tiles[line][column].x == -1) board->tiles[line][column].x = lastMove->color;
+            else if (board->tiles[line][column].x < -1) board->tiles[line][column].x++;
+        }
+    }
+    if (lastMove->previous) lastMove->previous->next = NULL;
     free(lastMove);
 }
 
 MoveList *solveVariant1(Board *board) {
 
-    int id, numberOfTiles; 
+    int id, numberOfTiles;
+    MoveList *moves;
 
     while (1) {
             //showboard(board);
@@ -46,28 +53,28 @@ MoveList *solveVariant1(Board *board) {
             id = findTopSweep(board);
             if (id == -1) break;
 
-            numberOfTiles = removeCluster(board, id);
+            moves = removeCluster(board, id);
             resetClusterSets(board);
 
             applyGravity(board);
-            moveHead = moveListAdd(moveHead, line, column);
             board->score += numberOfTiles * (numberOfTiles - 1);
             showBoard(board);
             printf("score: %i\n", board->score);
             showID(board);
     }
 
-    return moveHead;
+    return moves;
 }
 
 MoveList *solveVariant2or3(Board *board) {
 
-    MoveList *head, *currentMove, *previous = NULL, *solution;
-    int a = 2;
+    MoveList *head, *currentMove = NULL, *previous = NULL, *solution;
+    int a = 1, id;
     while (a) {
         a--;
+        previous = currentMove;
         findAllClusters(board);
-        id = findTopSweep(board);
+        id = findBottomSweep(board);
         /*if (id == -1) {
             revertMove(board, currentMove);
             continue;
@@ -76,8 +83,28 @@ MoveList *solveVariant2or3(Board *board) {
         currentMove->tileHead = applyGravity(board);
         currentMove->previous = previous;
         if (previous) previous->next = currentMove;
-        previous = currentMove;
+        showBoard(board);
+        showTileList(currentMove->tileHead);
     }
-    revertMove(board, previous);
+    revertMove(board, currentMove);
+    showBoard(board);
     return solution;
+}
+
+void freeMoveList(MoveList *head) {
+
+    MoveList *moveTmp;
+    TileList *tileTmp;
+
+    while (head) {
+        while (head->tileHead) {
+            tileTmp = head->tileHead;
+            head->tileHead = head->tileHead->next;
+            free(tileTmp);
+        }
+        moveTmp = head;
+        head = head->next;
+        free(moveTmp);
+    }
+    return;
 }

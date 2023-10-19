@@ -84,10 +84,14 @@ void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score) {
     /* Writing the problem header */
     fprintf(file, "%i %i %i\n",
                 board->lines, board->columns, board->variant);
-    for (moves = 0, move = allMoves; move; move = move->next, moves++);
-    fprintf(file, "%i %i\n", moves, score);
-    for (move = allMoves; move; move = move->next) {
-        fprintf(file, "%i %i\n", move->line, move->column);
+    if (!allMoves) {
+        fprintf(file, "0 -1\n\n");
+        return;
+    } 
+    for (moves = 1, move = allMoves; move->next; move = move->next, moves++);
+    fprintf(file, "%i %i\n", moves, allMoves->score);
+    for (; move; move = move->previous) {
+        fprintf(file, "%i %i\n", move->tile.y, move->tile.x);
     }
     fprintf(file, "\n");
 

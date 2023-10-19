@@ -58,7 +58,8 @@ void findAllClusters(Board* board){
             color = board->tiles[line-1][column-1].x;
             id = convert(line, column, board->columns);
             printf("if of current tile is %u\n", id);
-            if (id == board->tiles[line-1][column-1].y){
+            if (color < 0) board->tiles[line-1][column-1].x--;
+            else if (id == board->tiles[line-1][column-1].y){
                 printf("tile not on a clusterSet!\n");
                 tilesInCluster = findCluster(board, line, column, color, id);
             }
@@ -128,14 +129,12 @@ MoveList *removeCluster(Board *board, int id) {
     int color;
     MoveList *move = (MoveList *) malloc(sizeof(MoveList));
 
-    move->id = id;
-    move->color = board->tiles
 
-    for (uint line = 1; line <= board->lines; line++) {
-        for (uint column = 1; column <= board->columns; column++) {
-            if (board->tiles[line-1][column-1].y == id) {
-                color = board->tiles[line-1][column-1].x;
-                board->tiles[line - 1][column - 1].x = -1;
+    for (uint line = 0; line < board->lines; line++) {
+        for (uint column = 0; column < board->columns; column++) {
+            if (board->tiles[line][column].y == id) {
+                color = board->tiles[line][column].x;
+                board->tiles[line][column].x = -1;
                 totalTiles++;
             }
         }
@@ -173,7 +172,8 @@ TileList *applyGravity(Board *board) {
                 counter++;
             /* Making a tile fall */
             } else if (counter) {
-                addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column, line - counter});
+                headTile = addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column, line - counter});
+                printf("%p\n", headTile);
                 board->tiles[line - counter][column].x = board->tiles[line][column].x;
                 board->tiles[line][column].x = -1;
             }
@@ -234,4 +234,14 @@ void showID(Board* board){
         fprintf(stdout, "\n");
     } 
     fprintf(stdout, "\n");
+}
+
+void showTileList(TileList *tiles) {
+
+    TileList *aux;
+    printf("%p\n", tiles);
+    for (aux = tiles; aux; aux = aux->next) {
+        printf("%i %i\n%i %i\n\n", aux->initPos.y, aux->initPos.x, aux->finalPos.y, aux->finalPos.x);
+    }
+
 }

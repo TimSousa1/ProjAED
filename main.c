@@ -52,8 +52,9 @@ int main(int argc, char **argv){
         }
         error = 0;
         moveHead = NULL;
+        showBoard(board);
         if (board->variant == -1) solveVariant1(board);
-        else if (board->variant == -3 && board->variant >= 0) solveVariant2or3();
+        else if (board->variant == -3 || board->variant >= 0) solveVariant2or3(board);
 
         
         /* Writing to the output file */

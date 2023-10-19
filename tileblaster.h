@@ -38,7 +38,7 @@ typedef struct _moveList {
 
     struct _moveList *previous;
     struct _moveList *next;
-} MoveList
+} MoveList;
 
 Board* getBoard(FILE *file, int *error);
 void freeBoard(Board *board);
@@ -50,16 +50,20 @@ int findTopSweep(Board*);
 int findBottomSweep(Board*);
 int findLargest(Board*);
 
-uint removeCluster(Board *board, int id);
+MoveList *removeCluster(Board *board, int id);
 void resetClusterSets(Board*);
 
-void applyGravity(Board*);
+TileList *applyGravity(Board*);
 
-MoveList *moveListAdd(MoveList *head, uint line, uint column);
+TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos);
+
+MoveList *solveVariant1(Board *board);
+MoveList *solveVariant2or3(Board *board);
 void freeMoveList(MoveList *head);
 
 void showBoard(Board*);
 void showID(Board*);
+void showTileList(TileList *tiles);
 
 char *outputName(char *inputName);
 void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score);
