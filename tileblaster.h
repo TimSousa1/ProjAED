@@ -16,7 +16,10 @@ typedef struct _board {
 
     int variant;
     int score;
-    
+
+    uint *colors;
+    uint numColors;
+
     Vector2 **tiles;
 
 } Board;
@@ -35,25 +38,29 @@ typedef struct _moveList {
     int score;
 
     TileList *tileHead;
+    uint tilesMoved;
 
-    struct _moveList *previous;
     struct _moveList *next;
 } MoveList;
 
 Board* getBoard(FILE *file, int *error);
 void freeBoard(Board *board);
 
+void countTiles(Board *board);
+
 int findCluster(Board*, int line, int column, int color, uint originalID);
 void findAllClusters(Board*);
 
 int findTopSweep(Board*);
-int findBottomSweep(Board*);
+int findBottomSweep(Board*, Vector2 lastPlay);
 int findLargest(Board*);
 
 MoveList *removeCluster(Board *board, int id);
 void resetClusterSets(Board*);
 
-TileList *applyGravity(Board*);
+TileList *applyGravity(Board*, uint *tilesMoved);
+
+uint hopeless(Board *board, uint goal);
 
 TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos);
 
@@ -64,8 +71,9 @@ void freeMoveList(MoveList *head);
 void showBoard(Board*);
 void showID(Board*);
 void showTileList(TileList *tiles);
+void showMoveList(MoveList *lastMove);
 
 char *outputName(char *inputName);
-void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score);
+void writeFile(FILE *file, Board *board, MoveList *answer, uint score);
 
 #endif

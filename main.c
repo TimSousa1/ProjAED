@@ -31,7 +31,7 @@ int main(int argc, char **argv){
     if (!fileIn || !fileOut) return ERROR_FILE;
     
     Board *board;
-    MoveList *moveHead;
+    MoveList *answer;
     
     error = 0;
     /* Reading a single problem and creating a board for it */
@@ -51,15 +51,16 @@ int main(int argc, char **argv){
             continue;
         }
         error = 0;
-        moveHead = NULL;
+        answer = NULL;
+        countTiles(board);
         showBoard(board);
-        if (board->variant == -1) solveVariant1(board);
-        else if (board->variant == -3 || board->variant >= 0) solveVariant2or3(board);
+        if (board->variant == -1) answer = solveVariant1(board);
+        else if (board->variant == -3 || board->variant >= 0) answer = solveVariant2or3(board);
 
         
         /* Writing to the output file */
-        writeFile(fileOut, board, moveHead, score);
-        freeMoveList(moveHead);
+        writeFile(fileOut, board, answer, score);
+        freeMoveList(answer);
         freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */
