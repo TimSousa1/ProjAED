@@ -203,7 +203,7 @@ TileList *applyGravity(Board *board, uint *tilesMoved) {
         /* Sliding a column to the right */
         } else if (counter) {
             for (line = 0; line < board->lines; line++) {
-                addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column + counter, line});
+                headTile = addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column + counter, line});
 
                 //We havent tried anything yet
 

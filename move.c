@@ -35,27 +35,27 @@ TileList *createTileList() {
 
 MoveList *revertMove(Board *board, MoveList* lastMove) {
 
-    TileList *currentTile, *tmp;
-    VectorList *currentVector, *tmp2;
     MoveList *ret;
-    uint line, column;
+    TileList *tmp1;
+    VectorList *tmp2;
 
-    for (currentTile = lastMove->tileHead; currentTile;) {
-        board->tiles[currentTile->initPos.y][currentTile->initPos.x].x = board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x;
-        board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x = -1;
-        tmp = currentTile;
-        currentTile = currentTile->next;
-        free(tmp);
-        //showBoard(board);
+    while (lastMove->tileHead) {
+        board->tiles[lastMove->tileHead->initPos.y][lastMove->tileHead->initPos.x].x = 
+            board->tiles[lastMove->tileHead->finalPos.y][lastMove->tileHead->finalPos.x].x;
+        board->tiles[lastMove->tileHead->finalPos.y][lastMove->tileHead->finalPos.x].x = -1;
+
+        tmp1 = lastMove->tileHead;
+        lastMove->tileHead = lastMove->tileHead->next;
+        free(tmp1);
     }
+    while (lastMove->removedTiles) {
+        board->tiles[lastMove->removedTiles->tile.y][lastMove->removedTiles->tile.x].x = lastMove->color;
 
-    for (currentVector = lastMove->removedTiles; currentVector;) {
-        board->tiles[currentVector->tile.y][currentVector->tile.x].x = lastMove->color;
-        tmp2 = currentVector;
-        currentVector = currentVector->next;
+        tmp2 = lastMove->removedTiles;
+        lastMove->removedTiles = lastMove->removedTiles->next;
         free(tmp2);
     }
-
+    
     ret = lastMove->next;
     free(lastMove);
     return ret;
