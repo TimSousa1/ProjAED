@@ -24,6 +24,12 @@ typedef struct _board {
 
 } Board;
 
+typedef struct _vectorlist{
+    Vector2 tile;
+    
+    struct _vectorlist *next;
+} VectorList;
+
 typedef struct _tileList{
     Vector2 initPos;
     Vector2 finalPos;
@@ -36,6 +42,8 @@ typedef struct _moveList {
     int color;
     int id;
     int score;
+
+    VectorList *removedTiles;
 
     TileList *tileHead;
     uint tilesMoved;
@@ -58,6 +66,7 @@ int findLargest(Board*);
 MoveList *removeCluster(Board *board, int id);
 void resetClusterSets(Board*);
 
+VectorList *addToVectorList(VectorList *head, Vector2 tile);
 TileList *applyGravity(Board*, uint *tilesMoved);
 
 uint hopeless(Board *board, uint goal);

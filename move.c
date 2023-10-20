@@ -13,6 +13,16 @@ TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos) {
     return tile;
 }
 
+VectorList *addToVectorList(VectorList *head, Vector2 tile) {
+
+    VectorList *vector = (VectorList *) malloc(sizeof(VectorList));
+
+    vector->tile = tile;
+    vector->next = head;
+
+    return vector;
+}
+
 MoveList *createMoveList() {
     MoveList *move = (MoveList *) malloc(sizeof(MoveList));
     return move;
@@ -26,23 +36,26 @@ TileList *createTileList() {
 MoveList *revertMove(Board *board, MoveList* lastMove) {
 
     TileList *currentTile, *tmp;
+    VectorList *currentVector, *tmp2;
     MoveList *ret;
     uint line, column;
 
     for (currentTile = lastMove->tileHead; currentTile;) {
         board->tiles[currentTile->initPos.y][currentTile->initPos.x].x = board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x;
-        board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x = lastMove->color;
+        board->tiles[currentTile->finalPos.y][currentTile->finalPos.x].x = -1;
         tmp = currentTile;
         currentTile = currentTile->next;
         free(tmp);
         //showBoard(board);
     }
-    for (uint line = 0; line < board->lines; line++) {
-        for (uint column = 0; column < board->columns; column++) {
-            if (board->tiles[line][column].x == -1) board->tiles[line][column].x = lastMove->color;
-            else if (board->tiles[line][column].x < -1) board->tiles[line][column].x++;
-        }
+
+    for (currentVector = lastMove->removedTiles; currentVector;) {
+        board->tiles[currentVector->tile.y][currentVector->tile.x].x = lastMove->color;
+        tmp2 = currentVector;
+        currentVector = currentVector->next;
+        free(tmp2);
     }
+
     ret = lastMove->next;
     free(lastMove);
     return ret;
@@ -128,6 +141,7 @@ MoveList *solveVariant2or3(Board *board) {
             showMoveList(head);
             continue;
         }
+        previous = head;
         showBoard(board);
         printf("--removing--\n\n");
         head = removeCluster(board, id);
@@ -137,9 +151,9 @@ MoveList *solveVariant2or3(Board *board) {
         showBoard(board);
         printf("--falling--\n\n");
         head->tileHead = applyGravity(board, &tilesMoved);
+        if (previous) head->score += previous->score; 
         head->tilesMoved = tilesMoved;
-        head->next = head;
-        head = head;
+        head->next = previous;
         showBoard(board);
         showMoveList(head);
         showTileList(head->tileHead);
@@ -153,12 +167,18 @@ void freeMoveList(MoveList *head) {
 
     MoveList *moveTmp;
     TileList *tileTmp;
+    VectorList *vectorTmp;
 
     while (head) {
         while (head->tileHead) {
             tileTmp = head->tileHead;
             head->tileHead = head->tileHead->next;
             free(tileTmp);
+        }
+        while (head->removedTiles) {
+            vectorTmp = head->removedTiles;
+            head->removedTiles = head->removedTiles->next;
+            free(vectorTmp);
         }
         moveTmp = head;
         head = head->next;
@@ -168,9 +188,9 @@ void freeMoveList(MoveList *head) {
 }
 
 void showMoveList(MoveList *lastMove) {
-
-    for (MoveList *aux; aux; aux=aux->next) {
+    printf("--------\n");
+    for (MoveList *aux = lastMove; aux; aux=aux->next) {
         printf("%i %i\n", aux->tile.y, aux->tile.x);
     }
-
+    printf("--------\n\n");
 }

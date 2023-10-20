@@ -69,8 +69,7 @@ void findAllClusters(Board* board){
             color = board->tiles[line-1][column-1].x;
             id = convert(line, column, board->columns);
             //printf("if of current tile is %u\n", id);
-            if (color < 0) board->tiles[line-1][column-1].x--;
-            else if (id == board->tiles[line-1][column-1].y){
+            if (id == board->tiles[line-1][column-1].y){
                 //printf("tile not on a clusterSet!\n");
                 tilesInCluster = findCluster(board, line, column, color, id);
             }
@@ -139,7 +138,7 @@ MoveList *removeCluster(Board *board, int id) {
     uint totalTiles = 0;
     int color;
     MoveList *move = (MoveList *) malloc(sizeof(MoveList));
-
+    move->removedTiles = NULL;
 
     for (uint line = 0; line < board->lines; line++) {
         for (uint column = 0; column < board->columns; column++) {
@@ -147,6 +146,7 @@ MoveList *removeCluster(Board *board, int id) {
                 color = board->tiles[line][column].x;
                 board->tiles[line][column].x = -1;
                 totalTiles++;
+                move->removedTiles = addToVectorList(move->removedTiles, (Vector2) {column, line});
             }
         }
     }
@@ -237,6 +237,7 @@ void freeBoard(Board *board) {
         free(board->tiles[i]);
     }
     free(board->tiles);
+    free(board->colors);
     /* Freeing the memory allocated for the board */
     free(board);
 
