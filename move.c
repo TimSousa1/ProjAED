@@ -23,16 +23,6 @@ VectorList *addToVectorList(VectorList *head, Vector2 tile) {
     return vector;
 }
 
-MoveList *createMoveList() {
-    MoveList *move = (MoveList *) malloc(sizeof(MoveList));
-    return move;
-}
-
-TileList *createTileList() {
-    TileList *tile = (TileList *) malloc(sizeof(TileList));
-    return tile;
-}
-
 MoveList *revertMove(Board *board, MoveList* lastMove) {
 
     MoveList *ret;
@@ -110,24 +100,21 @@ Solution solveVariant2or3(Board *board) {
 
     MoveList *head = NULL, *previous = NULL;
     Solution solution;
-    Vector2 lastPlay;
-    int id;
+    int id, lastID = -1;
     int target = board->variant;
     uint tilesMoved;
     
     solution.score = 0;
     solution.moves = NULL;
 
-    lastPlay.x = -1;
-    lastPlay.y = -1;
-
     while (1) {
         resetClusterSets(board);
         findAllClusters(board);
-        id = findBottomSweep(board, lastPlay);
+        //printf("Making play: %i %i\n\n", play.y, play.x);
+        id = idSweep(board, lastID);
         //printf("%i\n", id);
         if (id == -1 || hopeless(board, target, head)) {
-            if (!head ) {
+            if (!head) {
                 //printf("leaving\n");
                 break;
             } 
@@ -143,8 +130,8 @@ Solution solveVariant2or3(Board *board) {
                 if (solution.moves) freeVectorList(solution.moves);
                 solution = createSolution(head);
             }
-            lastPlay = head->tile;
-            //printf("%i %i\n\n", lastPlay.y, lastPlay.x);
+            lastID = head->id;
+            //printf("Next Play: %i %i\n\n", play.y, play.x);
             //showBoard(board);
             //printf("--reverting--\n\n");
             //showMoveList(head);
@@ -156,9 +143,9 @@ Solution solveVariant2or3(Board *board) {
         previous = head;
         //showBoard(board);
         //printf("--removing--\n\n");
+        //printf("%i\n", id);
         head = removeCluster(board, id);
-        lastPlay.x = -1;
-        lastPlay.y = -1;
+        lastID = -1;
         //printf("%i %i\n", head->tile.y, head->tile.x);
         //showBoard(board);
         //printf("--falling--\n\n");
@@ -167,7 +154,7 @@ Solution solveVariant2or3(Board *board) {
         head->tilesMoved = tilesMoved;
         head->next = previous;
         //showBoard(board);
-        //showMoveList(head);
+        showMoveList(head);
         //showTileList(head->tileHead);
     }
     showBoard(board);

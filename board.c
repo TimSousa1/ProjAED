@@ -16,6 +16,13 @@ void countTiles(Board *board) {
 
 }
 
+Vector2 convertToCoordinate(int id, int columns) {
+    Vector2 ret;
+    ret.x = id % columns + 1;
+    ret.y = id / columns + 1;
+    return ret;
+}
+
 /******************************************************************************
  * findCluster ()
  *
@@ -94,20 +101,44 @@ int findTopSweep(Board* board){
     return -1;
 }
 
+int idSweep(Board *board, int lastID) {
+    Vector2 tile;
+    int tilesInCluster, column, line, color;
+    tile = convertToCoordinate(lastID, board->columns);
+    for (int id = lastID+1; id < board->columns*board->lines; id++) {
+        if (board->tiles[tile.y-1][tile.x-1].x == -1 &&
+            board->tiles[tile.y-1][tile.x-1].y != id) continue;
+        tile = convertToCoordinate(id, board->columns);
+        column = tile.x;
+        line = tile.y;
+        color = board->tiles[line-1][column-1].x;
+        tilesInCluster = findCluster(board, line, column, color, id);
+        if (tilesInCluster > 1) return id;
+    }
+    return -1;
+}
+
 // searches for the first cluster from bottom left to right
-int findBottomSweep(Board* board, Vector2 lastPlay){
+Vector2 findBottomSweep(Board* board, Vector2 play){
     int color, id;
     int tilesInCluster;
+    Vector2 ret;
+    ret.x = -1;
+    ret.y = -1;
 
-    for (uint line = lastPlay.y + 2; line <= board->lines; line++){
-        for (uint column = lastPlay.x + 3; column <= board->columns; column++){
+    for (uint line = play.y + 1; line <= board->lines; line++){
+        for (uint column = play.x + 1; column <= board->columns; column++){
             color = board->tiles[line-1][column-1].x;
             id = board->tiles[line-1][column-1].y;
             tilesInCluster = findCluster(board, line, column, color, id);
-            if (tilesInCluster > 1) return id;
+            if (tilesInCluster > 1) {
+                ret.x = column - 1;
+                ret.y = line - 1;
+                return ret;
+            }
         }
     }
-    return -1;
+    return ret;
 }
 
 int findLargest(Board* board){
@@ -140,14 +171,14 @@ MoveList *removeCluster(Board *board, int id) {
     MoveList *move = (MoveList *) malloc(sizeof(MoveList));
     move->removedTiles = NULL;
 
-    for (uint line = 0; line < board->lines; line++) {
-        for (uint column = 0; column < board->columns; column++) {
-            if (board->tiles[line][column].y == id) {
-                color = board->tiles[line][column].x;
-                board->tiles[line][column].x = -1;
+    for (uint line = 1; line <= board->lines; line++) {
+        for (uint column = 1; column <= board->columns; column++) {
+            if (board->tiles[line-1][column-1].y == id) {
+                color = board->tiles[line-1][column-1].x;
+                board->tiles[line-1][column-1].x = -1;
                 totalTiles++;
                 board->colors[color-1]--;
-                move->removedTiles = addToVectorList(move->removedTiles, (Vector2) {column, line});
+                move->removedTiles = addToVectorList(move->removedTiles, (Vector2) {column-1, line-1});
             }
         }
     }
@@ -176,20 +207,20 @@ TileList *applyGravity(Board *board, uint *tilesMoved) {
     
     *tilesMoved = 0;
     /* Simulating vertical gravity */
-    for (column = 0; column < board->columns; column++) {
+    for (column = 1; column <= board->columns; column++) {
         /* Setting the counter of empty tiles to 0 */
         counter = 0;
-        for (line = 0; line < board->lines; line++) {
+        for (line = 1; line <= board->lines; line++) {
 
             /* Counting the number of empty tiles */
-            if (board->tiles[line][column].x < 0) {
+            if (board->tiles[line-1][column-1].x < 0) {
                 counter++;
             /* Making a tile fall */
             } else if (counter) {
-                headTile = addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column, line - counter});
+                headTile = addToTileList(headTile, (Vector2) {column-1, line-1}, (Vector2) {column-1, line-1 - counter});
                 //printf("%p\n", headTile);
-                board->tiles[line - counter][column].x = board->tiles[line][column].x;
-                board->tiles[line][column].x = -1;
+                board->tiles[line - counter-1][column-1].x = board->tiles[line-1][column-1].x;
+                board->tiles[line-1][column-1].x = -1;
                 tilesMoved++;
             }
         }
@@ -197,19 +228,19 @@ TileList *applyGravity(Board *board, uint *tilesMoved) {
 
     /* Simulating horizontal gravity */
     counter = 0;
-    for (column = board->columns - 1; column >= 0; column--) {
+    for (column = board->columns; column > 0; column--) {
         /* Counting the number of empty columns */
-        if (board->tiles[0][column].x < 0) {
+        if (board->tiles[0][column-1].x < 0) {
             counter++;
         /* Sliding a column to the right */
         } else if (counter) {
-            for (line = 0; line < board->lines; line++) {
-                headTile = addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column + counter, line});
+            for (line = 1; line <= board->lines; line++) {
+                headTile = addToTileList(headTile, (Vector2) {column-1, line-1}, (Vector2) {column-1 + counter, line-1});
 
                 //We havent tried anything yet
 
-                board->tiles[line][column + counter].x = board->tiles[line][column].x;
-                board->tiles[line][column].x = -1;
+                board->tiles[line-1][column-1 + counter].x = board->tiles[line-1][column-1].x;
+                board->tiles[line-1][column-1].x = -1;
             }
         }
     }

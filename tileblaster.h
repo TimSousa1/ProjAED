@@ -23,7 +23,7 @@ typedef struct _board {
 
 } Board;
 
-typedef struct _vectorlist{
+typedef struct _vectorlist {
     Vector2 tile;
     
     struct _vectorlist *next;
@@ -63,8 +63,9 @@ void countTiles(Board *board);
 int findCluster(Board*, int line, int column, int color, uint originalID);
 void findAllClusters(Board*);
 
+int idSweep(Board *board, int lastID);
 int findTopSweep(Board*);
-int findBottomSweep(Board*, Vector2 lastPlay);
+Vector2 findBottomSweep(Board*, Vector2 play);
 int findLargest(Board*);
 
 MoveList *removeCluster(Board *board, int id);
