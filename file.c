@@ -25,7 +25,6 @@ Board *getBoard(FILE *file, int *error){
             free(board);
             return NULL;    
     } 
-    board->score = 0;
     
     // initializing the board matrix
     board->tiles = (Vector2 **) malloc (board->lines * sizeof(Vector2 *));
@@ -95,12 +94,6 @@ char *outputName(char *inputName) {
     return name;
 }
 
-void printAnswer(FILE *file, MoveList *answer) {
-    if (!answer) return;
-    printAnswer(file, answer->next);
-    fprintf(file, "%i %i\n", answer->tile.y, answer->tile.x);
-}
-
 /******************************************************************************
  * writeFile ()
  *
@@ -111,21 +104,21 @@ void printAnswer(FILE *file, MoveList *answer) {
  * Description: writes to the output file the answer to the problem according to its variant
  *****************************************************************************/
 
-void writeFile(FILE *file, Board *board, MoveList *allMoves, uint score) {
+void writeFile(FILE *file, Board *board, Solution allMoves) {
 
     uint moves;
-    MoveList *move;
+    VectorList *move;
 
     /* Writing the problem header */
     fprintf(file, "%i %i %i\n",
                 board->lines, board->columns, board->variant);
-    if (!allMoves) {
+    if (!allMoves.moves) {
         fprintf(file, "0 -1\n\n");
         return;
     } 
-    for (moves = 1, move = allMoves; move->next; move = move->next, moves++);
-    fprintf(file, "%i %i\n", moves, allMoves->score);
-    printAnswer(file, allMoves);
+    for (moves = 0, move = allMoves.moves; move; move = move->next, moves++);
+    fprintf(file, "%i %i\n", moves, allMoves.score);
+    for (move = allMoves.moves; move; move = move->next) fprintf(file, "%i %i\n", move->tile.y, move->tile.x);
     fprintf(file, "\n");
 
     return;

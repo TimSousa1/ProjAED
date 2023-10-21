@@ -15,7 +15,6 @@ typedef struct _board {
     int columns;
 
     int variant;
-    int score;
 
     uint *colors;
     uint numColors;
@@ -51,6 +50,11 @@ typedef struct _moveList {
     struct _moveList *next;
 } MoveList;
 
+typedef struct _solution {
+    uint score;
+    VectorList *moves;
+} Solution;
+
 Board* getBoard(FILE *file, int *error);
 void freeBoard(Board *board);
 
@@ -69,13 +73,14 @@ void resetClusterSets(Board*);
 VectorList *addToVectorList(VectorList *head, Vector2 tile);
 TileList *applyGravity(Board*, uint *tilesMoved);
 
-uint hopeless(Board *board, uint goal);
+uint hopeless(Board *board, int goal, MoveList *head);
 
 TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos);
 
-MoveList *solveVariant1(Board *board);
-MoveList *solveVariant2or3(Board *board);
+Solution solveVariant1(Board *board);
+Solution solveVariant2or3(Board *board);
 void freeMoveList(MoveList *head);
+void freeVectorList(VectorList *head);
 
 void showBoard(Board*);
 void showID(Board*);
@@ -83,6 +88,6 @@ void showTileList(TileList *tiles);
 void showMoveList(MoveList *lastMove);
 
 char *outputName(char *inputName);
-void writeFile(FILE *file, Board *board, MoveList *answer, uint score);
+void writeFile(FILE *file, Board *board, Solution answer);
 
 #endif

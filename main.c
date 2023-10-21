@@ -13,7 +13,7 @@ int main(int argc, char **argv){
 
     /* Allocating memory to know if there are any problems with the problem format */
     int error, color, id;
-    uint total, score, line, column, tiles;
+    uint total, line, column, tiles;
 
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
@@ -31,7 +31,7 @@ int main(int argc, char **argv){
     if (!fileIn || !fileOut) return ERROR_FILE;
     
     Board *board;
-    MoveList *answer;
+    Solution answer;
     
     error = 0;
     /* Reading a single problem and creating a board for it */
@@ -51,7 +51,8 @@ int main(int argc, char **argv){
             continue;
         }
         error = 0;
-        answer = NULL;
+        answer.score = 0;
+        answer.moves = NULL;
         countTiles(board);
         showBoard(board);
         if (board->variant == -1) answer = solveVariant1(board);
@@ -59,8 +60,8 @@ int main(int argc, char **argv){
 
         
         /* Writing to the output file */
-        writeFile(fileOut, board, answer, score);
-        freeMoveList(answer);
+        writeFile(fileOut, board, answer);
+        freeVectorList(answer.moves);
         freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */

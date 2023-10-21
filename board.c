@@ -146,6 +146,7 @@ MoveList *removeCluster(Board *board, int id) {
                 color = board->tiles[line][column].x;
                 board->tiles[line][column].x = -1;
                 totalTiles++;
+                board->colors[color-1]--;
                 move->removedTiles = addToVectorList(move->removedTiles, (Vector2) {column, line});
             }
         }
@@ -215,18 +216,20 @@ TileList *applyGravity(Board *board, uint *tilesMoved) {
     return headTile;
 }
 
-uint hopeless(Board *board, uint goal) {
+uint hopeless(Board *board, int goal, MoveList *head) {
 
     if (goal < 0) return 0;
 
     uint score = 0;
+    if (head) score = head->score; 
 
     for (uint i = 0; i < board->numColors; i++) {
-        score += board->colors[i] * (board->colors[i]);
+        score += board->colors[i] * (board->colors[i]-1);
     }
-
+    //printf("Max Possible score: %i\n", score);
     if (score < goal) return 1;
-    else return 0;
+    //printf("Theres Hope!\n");
+    return 0;
 }
 
 void freeBoard(Board *board) {
