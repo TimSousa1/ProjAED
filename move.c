@@ -202,5 +202,7 @@ void showMoveList(MoveList *lastMove) {
     for (MoveList *aux = lastMove; aux; aux=aux->next) {
         printf("%i %i\n", aux->tile.y, aux->tile.x);
     }
+    printf("color: %i id: %i score: %i\n",
+            lastMove->color, lastMove->id, lastMove->score);
     printf("--------\n\n");
 }

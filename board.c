@@ -64,6 +64,7 @@ int findCluster(Board *board, int line, int column, int clusterColor, uint origi
     return tilesInCluster;
 }
 
+// we should seriously consider stop using this.
 void findAllClusters(Board* board){
     //printf("initializing search for all clusters..\n");
     int tilesInCluster;
@@ -104,15 +105,15 @@ int findTopSweep(Board* board){
 int idSweep(Board *board, int lastID) {
     Vector2 tile;
     int tilesInCluster, column, line, color;
-    tile = convertToCoordinate(lastID, board->columns);
+
     for (int id = lastID+1; id < board->columns*board->lines; id++) {
-        if (board->tiles[tile.y-1][tile.x-1].x == -1 &&
-            board->tiles[tile.y-1][tile.x-1].y != id) continue;
         tile = convertToCoordinate(id, board->columns);
-        column = tile.x;
-        line = tile.y;
-        color = board->tiles[line-1][column-1].x;
-        tilesInCluster = findCluster(board, line, column, color, id);
+        if (board->tiles[tile.y-1][tile.x-1].x == -1 ||
+            board->tiles[tile.y-1][tile.x-1].y != id) continue;
+
+        color = board->tiles[tile.y-1][tile.x-1].x;
+        tilesInCluster = findCluster(board, tile.y, tile.x, color, id);
+
         if (tilesInCluster > 1) return id;
     }
     return -1;
@@ -183,8 +184,7 @@ MoveList *removeCluster(Board *board, int id) {
         }
     }
 
-    move->tile.x = id % board->columns;
-    move->tile.y = id / board->columns;
+    move->tile = convertToCoordinate(id, board->columns);
     move->id = id;
     move->color = color;
     move->score = totalTiles * (totalTiles - 1);
