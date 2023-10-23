@@ -25,7 +25,7 @@ Vector2 convertToCoordinates(int id, int columns) {
 
 VectorList *mergeVectorList(VectorList *first, VectorList *second) {
     if (!first || !second) return first;
-    printf("merging %i %i with %i %i\n", first->tile.x, first->tile.y, second->tile.x, second->tile.y );
+    //printf("merging %i %i with %i %i\n", first->tile.x, first->tile.y, second->tile.x, second->tile.y );
 
     VectorList *last;
 
@@ -49,18 +49,18 @@ VectorList *findCluster(Board *board, int line, int column, int clusterColor, in
     //printf("finding cluster on tile (%i %i)..\n", line, column);
     if (line > board->lines || line <= 0 ||
             column > board->columns || column <= 0)
-    {printf("tile (%i %i) out of bounds!\n", column, line);return NULL;}
+    {/*printf("tile (%i %i) out of bounds!\n", column, line);*/return NULL;}
 
     int color;
     color = board->tiles[line - 1][column - 1].x;
     
     if (color != clusterColor || color < 1)
-    {printf("tile (%i %i) already on set or empty!\n", column, line);return NULL;}
+    {/*printf("tile (%i %i) already on set or empty!\n", column, line);*/return NULL;}
 
     VectorList *tile = (VectorList *) malloc(sizeof(VectorList));
     tile->next = NULL;
     tile->tile = (Vector2) {column, line};
-    printf("adding tile (%i %i) to clusterSet..\n", column, line);
+    //printf("adding tile (%i %i) to clusterSet..\n", column, line);
 
     // temporarily making the tile unavailable
     board->tiles[line-1][column-1].x = -1;
@@ -68,8 +68,8 @@ VectorList *findCluster(Board *board, int line, int column, int clusterColor, in
 
     VectorList *newTile, *tmp;
     newTile = findCluster(board, line + 1, column, clusterColor, originalID, toRemove); // up
-    if (newTile) printf("got a new tile at %i %i\n", newTile->tile.x, newTile->tile.y);
-    else printf("no eligible tile found\n");
+    /*if (newTile) printf("got a new tile at %i %i\n", newTile->tile.x, newTile->tile.y);
+    else printf("no eligible tile found\n");*/
     tile = mergeVectorList(tile, newTile);
 
     newTile = findCluster(board, line - 1, column, clusterColor, originalID, toRemove); // down
@@ -83,6 +83,7 @@ VectorList *findCluster(Board *board, int line, int column, int clusterColor, in
 
     // reassigning the tile its original color
     if (!toRemove) board->tiles[line-1][column-1].x = color;
+    else board->colors[color-1]--;
 
     return tile;
 }
@@ -104,13 +105,13 @@ VectorList *findAllClusters(Board* board){
 
     for (uint line = board->lines; line > 0; line--){
         for (uint column = 1; column <= board->columns; column++){
-            showID(board);
-            printf("on tile (%i %i)\n", line, column);
+            //showID(board);
+            //printf("on tile (%i %i)\n", line, column);
             color = board->tiles[line-1][column-1].x;
             id = convert(line, column, board->columns);
-            printf("id %i\n", id);
+            //printf("id %i\n", id);
             if (id == board->tiles[line-1][column-1].y && color != -1){
-                printf("tile not on a clusterSet!\n");
+                //printf("tile not on a clusterSet!\n");
                 cluster = findCluster(board, line, column, color, id, 0); // finding a single cluster
                 if (cluster->next) {
                     head = addToVectorList(head, cluster->tile);
@@ -218,7 +219,9 @@ MoveList *removeCluster(Board *board, Vector2 tile) {
     move->tile = tile;
     move->id = convert(tile.y, tile.x, board->columns);
     move->color = color;
-    for (VectorList *current; current; current = current->next) totalTiles++;
+    //showVectorList(move->removedTiles);
+    for (VectorList *current = move->removedTiles; current; current = current->next) totalTiles++;
+    //printf("??%i??\n", totalTiles);
     move->score = totalTiles * (totalTiles - 1);
     move->next = NULL;
     return move;
@@ -248,7 +251,7 @@ TileList *applyGravity(Board *board) {
                 counter++;
             /* Making a tile fall */
             } else if (counter) {
-                headTile = addToTileList(headTile, (Vector2) {column-1, line-1}, (Vector2) {column-1, line-1 - counter});
+                headTile = addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column, line - counter});
                 //printf("%p\n", headTile);
                 board->tiles[line - counter-1][column-1].x = board->tiles[line-1][column-1].x;
                 board->tiles[line-1][column-1].x = -1;
@@ -265,7 +268,7 @@ TileList *applyGravity(Board *board) {
         /* Sliding a column to the right */
         } else if (counter) {
             for (line = 1; line <= board->lines; line++) {
-                headTile = addToTileList(headTile, (Vector2) {column-1, line-1}, (Vector2) {column-1 + counter, line-1});
+                headTile = addToTileList(headTile, (Vector2) {column, line}, (Vector2) {column + counter, line});
 
                 //We havent tried anything yet
 

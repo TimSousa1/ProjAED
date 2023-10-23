@@ -38,16 +38,16 @@ MoveList *revertMove(Board *board, MoveList* lastMove) {
     VectorList *tmp2;
 
     while (lastMove->tileHead) {
-        board->tiles[lastMove->tileHead->initPos.y][lastMove->tileHead->initPos.x].x = 
-            board->tiles[lastMove->tileHead->finalPos.y][lastMove->tileHead->finalPos.x].x;
-        board->tiles[lastMove->tileHead->finalPos.y][lastMove->tileHead->finalPos.x].x = -1;
+        board->tiles[lastMove->tileHead->initPos.y-1][lastMove->tileHead->initPos.x-1].x = 
+            board->tiles[lastMove->tileHead->finalPos.y-1][lastMove->tileHead->finalPos.x-1].x;
+        board->tiles[lastMove->tileHead->finalPos.y-1][lastMove->tileHead->finalPos.x-1].x = -1;
 
         tmp1 = lastMove->tileHead;
         lastMove->tileHead = lastMove->tileHead->next;
         free(tmp1);
     }
     while (lastMove->removedTiles) {
-        board->tiles[lastMove->removedTiles->tile.y][lastMove->removedTiles->tile.x].x = lastMove->color;
+        board->tiles[lastMove->removedTiles->tile.y-1][lastMove->removedTiles->tile.x-1].x = lastMove->color;
         board->colors[lastMove->color-1]++;
         tmp2 = lastMove->removedTiles;
         lastMove->removedTiles = lastMove->removedTiles->next;
@@ -133,7 +133,7 @@ Solution solve(Board *board) {
 
     origin->tile.x = -1;
     origin->tile.y = -1;
-    origin->score = -1;
+    origin->score = 0;
     origin->id = -1;
     origin->color = -1;
     origin->clusters = NULL;
@@ -150,7 +150,7 @@ Solution solve(Board *board) {
         } else {
             current->clusters = removeVector(current->clusters);
         }
-
+        showVectorList(current->clusters);
         if (!current->clusters || hopeless(board, target, current)) {
             if (origin == current) {
                 //printf("leaving\n");
@@ -169,35 +169,35 @@ Solution solve(Board *board) {
                 solution = createSolution(current);
             }
             //printf("Next Play: %i %i\n\n", play.y, play.x);
-            //showBoard(board);
-            //printf("--reverting--\n\n");
+            showBoard(board);
+            printf("--reverting--\n\n");
             //showMoveList(head);
             
             current = revertMove(board, current);
             
             showBoard(board);
-            //showMoveList(head);
+            showMoveList(current);
             continue;
         }
         previous = current;
 
-        //showBoard(board);
-        //printf("--removing--\n\n");
+        showBoard(board);
+        printf("--removing--\n\n");
         //printf("%i\n", id);
         
         current = removeCluster(board, current->clusters->tile);
-        previous->clusters = removeVector(previous->clusters);
 
         //printf("%i %i\n", head->tile.y, head->tile.x);
-        //showBoard(board);
+        showBoard(board);
         //printf("--falling--\n\n");
         
         current->tileHead = applyGravity(board);
+        showBoard(board);
         if (previous) current->score += previous->score; 
         current->next = previous;
 
         showBoard(board);
-        //showMoveList(head);
+        showMoveList(current);
         //showTileList(head->tileHead);
     }
     showBoard(board);
