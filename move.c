@@ -53,6 +53,11 @@ MoveList *revertMove(Board *board, MoveList* lastMove) {
         lastMove->removedTiles = lastMove->removedTiles->next;
         free(tmp2);
     }
+    while (lastMove->clusters) {
+        tmp2 = lastMove->clusters;
+        lastMove->clusters = lastMove->clusters->next;
+        free(tmp2);
+    }
     
     ret = lastMove->next;
     free(lastMove);
@@ -161,6 +166,7 @@ Solution solve(Board *board) {
                 //printf("%p\n", head);
                 solution = createSolution(current);
                 freeMoveList(current);
+                free(origin);
                 return solution;
             } if (board->variant == -3 && current->score > target) {
                 target = current->score;
@@ -201,6 +207,7 @@ Solution solve(Board *board) {
         //showTileList(head->tileHead);
     }
     showBoard(board);
+    free(origin);
     //printf("%p\n", solution);
     return solution;
 }
@@ -220,6 +227,11 @@ void freeMoveList(MoveList *head) {
         while (head->removedTiles) {
             vectorTmp = head->removedTiles;
             head->removedTiles = head->removedTiles->next;
+            free(vectorTmp);
+        }
+        while (head->clusters) {
+            vectorTmp = head->clusters;
+            head->clusters = head->clusters->next;
             free(vectorTmp);
         }
         moveTmp = head;
