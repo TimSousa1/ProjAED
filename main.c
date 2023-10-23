@@ -53,11 +53,10 @@ int main(int argc, char **argv){
         error = 0;
         answer.score = 0;
         answer.moves = NULL;
-        countTiles(board);
+        countColors(board);
         showBoard(board);
-        if (board->variant == -1) answer = solveVariant1(board);
-        else if (board->variant == -3 || board->variant >= 0) answer = solveVariant2or3(board);
 
+        answer = solve(board);
         
         /* Writing to the output file */
         writeFile(fileOut, board, answer);

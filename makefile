@@ -13,7 +13,7 @@ o3::
 	gcc main.o file.o board.o move.o -o tileblaster -Wall -std=c99 -O3
 
 clean::
-	rm *.o tileblaster
+	rm *.o tileblaster *.out vgcore*
 
 run::
 	./tileblaster ../tiles/Primeiro_milho/Primeiro_milho02.tilewalls

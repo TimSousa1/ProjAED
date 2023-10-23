@@ -34,14 +34,13 @@ Board *getBoard(FILE *file, int *error){
     }
 
     // getting every element off of the file
-    for (int line = board->lines - 1, id = 0; line >= 0; line--){
+    for (int line = board->lines - 1; line >= 0; line--){
         for (int column = 0; column < board->columns; column++){
             fscanf(file, "%i", &board->tiles[line][column].x);
             if (board->tiles[line][column].x > numColor) numColor = board->tiles[line][column].x;
-            board->tiles[line][column].y = id;
-            id++;
         }
     }
+    resetClusterSets(board);
 
     board->colors = (uint *)malloc(numColor*sizeof(uint));
     board->numColors = numColor;

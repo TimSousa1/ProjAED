@@ -34,7 +34,6 @@ typedef struct _moveList {
     VectorList *removedTiles;
 
     TileList *tileHead;
-    uint tilesMoved;
 
     struct _moveList *next;
 } MoveList;
@@ -69,16 +68,14 @@ typedef struct _board {
 
     Vector2 **tiles;
 
-    MoveList *moves;
-
 } Board;
 
 Board* getBoard(FILE *file, int *error);
 void freeBoard(Board *board);
 
-void countTiles(Board *board);
+void countColors(Board *board);
 
-int findCluster(Board*, int line, int column, int color, bool toRemove);
+VectorList *findCluster(Board*, int line, int column, int color, int id, bool toRemove);
 VectorList *findAllClusters(Board*);
 
 int idSweep(Board *board, int lastID);
@@ -86,18 +83,17 @@ int findTopSweep(Board*);
 Vector2 findBottomSweep(Board*, Vector2 play);
 int findLargest(Board*);
 
-MoveList *removeCluster(Board *board, int id);
+MoveList *removeCluster(Board *board, Vector2 tile);
 void resetClusterSets(Board*);
 
 VectorList *addToVectorList(VectorList *head, Vector2 tile);
-TileList *applyGravity(Board*, uint *tilesMoved);
+TileList *applyGravity(Board*);
 
 uint hopeless(Board *board, int goal, MoveList *head);
 
 TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos);
 
-Solution solveVariant1(Board *board);
-Solution solveVariant2or3(Board *board);
+Solution solve(Board*);
 void freeMoveList(MoveList *head);
 void freeVectorList(VectorList *head);
 
@@ -105,6 +101,8 @@ void showBoard(Board*);
 void showID(Board*);
 void showTileList(TileList *tiles);
 void showMoveList(MoveList *lastMove);
+void showVectorList(VectorList*);
+
 
 char *outputName(char *inputName);
 void writeFile(FILE *file, Board *board, Solution answer);
