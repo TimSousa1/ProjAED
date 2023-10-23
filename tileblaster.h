@@ -3,25 +3,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct Vector2 {
     int x;
     int y;
 } Vector2;
-
-typedef struct _board {
-
-    int lines;
-    int columns;
-
-    int variant;
-
-    uint *colors;
-    uint numColors;
-
-    Vector2 **tiles;
-
-} Board;
 
 typedef struct _vectorlist {
     Vector2 tile;
@@ -42,6 +29,8 @@ typedef struct _moveList {
     int id;
     int score;
 
+    VectorList *clusters;
+
     VectorList *removedTiles;
 
     TileList *tileHead;
@@ -55,13 +44,42 @@ typedef struct _solution {
     VectorList *moves;
 } Solution;
 
+typedef struct _cluster {
+    Vector2 tile;
+    int id;
+    uint numberOfTiles;
+    int color;
+    VectorList *tiles;
+} Cluster;
+
+typedef struct _clusterlist {
+    Cluster cluster;
+    struct _clusterlist *next;
+} ClusterList;
+
+typedef struct _board {
+
+    int lines;
+    int columns;
+
+    int variant;
+
+    uint *colors;
+    uint numColors;
+
+    Vector2 **tiles;
+
+    MoveList *moves;
+
+} Board;
+
 Board* getBoard(FILE *file, int *error);
 void freeBoard(Board *board);
 
 void countTiles(Board *board);
 
-int findCluster(Board*, int line, int column, int color, uint originalID);
-void findAllClusters(Board*);
+int findCluster(Board*, int line, int column, int color, bool toRemove);
+VectorList *findAllClusters(Board*);
 
 int idSweep(Board *board, int lastID);
 int findTopSweep(Board*);

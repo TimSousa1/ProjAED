@@ -23,6 +23,14 @@ VectorList *addToVectorList(VectorList *head, Vector2 tile) {
     return vector;
 }
 
+VectorList *removeVector(VectorList *head) {
+
+    VectorList *ret = head->next;
+    free(head);
+    return ret;
+
+}
+
 MoveList *revertMove(Board *board, MoveList* lastMove) {
 
     MoveList *ret;
@@ -101,8 +109,9 @@ Solution solveVariant1(Board *board) {
 
 Solution solveVariant2or3(Board *board) {
 
-    MoveList *head = NULL, *previous = NULL;
+    MoveList *head, *previous = NULL, *current;
     Solution solution;
+    VectorList *possibleMoves;
     int id, lastID = -1;
     int target = board->variant;
     uint tilesMoved;
@@ -110,35 +119,51 @@ Solution solveVariant2or3(Board *board) {
     solution.score = 0;
     solution.moves = NULL;
 
+    head = (MoveList *) malloc(sizeof(*head));
+
+    head->tile.x = -1;
+    head->tile.y = -1;
+    head->score = -1;
+    head->id = -1;
+    head->color = -1;
+    head->clusters = NULL;
+    head->removedTiles = NULL;
+    head->tileHead = NULL;
+    head->tilesMoved = -1;
+    head->next = NULL;
+
+    current = head;
+
     while (1) {
-        resetClusterSets(board);
-        findAllClusters(board);
-        //printf("Making play: %i %i\n\n", play.y, play.x);
-        id = idSweep(board, lastID);
-        //printf("%i\n", id);
-        if (id == -1 || hopeless(board, target, head)) {
-            if (!head) {
+        if (!current->clusters) {
+            resetClusterSets(board);
+            current->clusters = findAllClusters(board);
+        } else {
+            current->clusters = removeVector(current->clusters);
+        }
+
+        if (!current->clusters || hopeless(board, target, current)) {
+            if (head == current) {
                 //printf("leaving\n");
                 break;
             } 
             //printf("%i ", head->score);
-            if (board->variant >= 0 && head->score > board->variant) {
+            if (board->variant >= 0 && current->score > board->variant) {
                 //printf("%p\n", head);
-                solution = createSolution(head);
-                freeMoveList(head);
+                solution = createSolution(current);
+                freeMoveList(current);
                 return solution;
-            } if (board->variant == -3 && head->score > target) {
-                target = head->score;
+            } if (board->variant == -3 && current->score > target) {
+                target = current->score;
                 //printf("New Target: %i\n", target);
                 if (solution.moves) freeVectorList(solution.moves);
-                solution = createSolution(head);
+                solution = createSolution(current);
             }
-            lastID = head->id;
             //printf("Next Play: %i %i\n\n", play.y, play.x);
             //showBoard(board);
             //printf("--reverting--\n\n");
             //showMoveList(head);
-            head = revertMove(board, head);
+            current = revertMove(board, current);
             //showBoard(board);
             //showMoveList(head);
             continue;
