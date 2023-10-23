@@ -113,8 +113,13 @@ void writeFile(FILE *file, Board *board, Solution allMoves) {
     fprintf(file, "%i %i %i\n",
                 board->lines, board->columns, board->variant);
     if (!allMoves.moves) {
-        fprintf(file, "0 -1\n\n");
-        return;
+        if (board->variant >= 0) {
+            fprintf(file, "0 -1\n\n");
+            return;
+        } else {
+            fprintf(file, "0 0\n\n");
+            return;
+        }
     } 
     for (moves = 0, move = allMoves.moves; move; move = move->next, moves++);
     fprintf(file, "%i %i\n", moves, allMoves.score);

@@ -53,6 +53,9 @@ MoveList *revertMove(Board *board, MoveList* lastMove) {
 
 Solution createSolution(MoveList *moves) {
     Solution answer;
+    answer.score = 0;
+    answer.moves = NULL;
+    if (!moves) return answer;
     VectorList *head = NULL;
     MoveList *aux;
     for (aux = moves; aux; aux = aux->next) {
@@ -154,7 +157,7 @@ Solution solveVariant2or3(Board *board) {
         head->tilesMoved = tilesMoved;
         head->next = previous;
         //showBoard(board);
-        showMoveList(head);
+        //showMoveList(head);
         //showTileList(head->tileHead);
     }
     showBoard(board);
