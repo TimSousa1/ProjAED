@@ -42,11 +42,8 @@ Board *getBoard(FILE *file, int *error){
     }
     resetClusterSets(board);
 
-    board->colors = (uint *)malloc(numColor*sizeof(uint));
+    board->colors = (uint *)calloc(numColor, sizeof(uint));
     board->numColors = numColor;
-    for (; numColor > 0; numColor--) {
-        board->colors[numColor-1] = 0;
-    }
 
     /* Checking if the problem is invalid or not */
     if (board->variant != -1 && board->variant != -3 && board->variant < 0) {

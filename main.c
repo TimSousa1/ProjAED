@@ -34,6 +34,7 @@ int main(int argc, char **argv){
     Solution answer;
     
     error = 0;
+    Board *copy = NULL;
     /* Reading a single problem and creating a board for it */
     while ((board = getBoard(fileIn, &error))){
         /* Reseting error */
@@ -56,12 +57,12 @@ int main(int argc, char **argv){
         countColors(board);
         showBoard(board);
 
-        answer = solve(board);
+        copy = copyBoard(board);
+        answer = solve(copy);
         
         /* Writing to the output file */
         writeFile(fileOut, board, answer);
         freeVectorList(answer.moves);
-        freeBoard(board);
     }
     /* Freeing the variable error and closing the files before closing the programm */
     free(filenameOut);

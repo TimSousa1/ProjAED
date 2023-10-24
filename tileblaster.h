@@ -23,21 +23,6 @@ typedef struct _tileList{
     struct _tileList *next;
 } TileList;
 
-typedef struct _moveList {
-    Vector2 tile;
-    int color;
-    int id;
-    int score;
-
-    VectorList *clusters;
-
-    VectorList *removedTiles;
-
-    TileList *tileHead;
-
-    struct _moveList *next;
-} MoveList;
-
 typedef struct _solution {
     uint score;
     VectorList *moves;
@@ -70,7 +55,20 @@ typedef struct _board {
 
 } Board;
 
-Board* getBoard(FILE *file, int *error);
+typedef struct _moveList {
+    Vector2 tile;
+    int color;
+    int id;
+    int score;
+
+    VectorList *clusters;
+    Board *board;
+
+    struct _moveList *next;
+} MoveList;
+
+Board *getBoard(FILE*, int *error);
+Board *copyBoard(Board*);
 void freeBoard(Board *board);
 
 void countColors(Board *board);
@@ -87,7 +85,7 @@ MoveList *removeCluster(Board *board, Vector2 tile);
 void resetClusterSets(Board*);
 
 VectorList *addToVectorList(VectorList *head, Vector2 tile);
-TileList *applyGravity(Board*);
+void applyGravity(Board*);
 
 uint hopeless(Board *board, int goal, MoveList *head);
 
