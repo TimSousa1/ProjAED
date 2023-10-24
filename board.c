@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 uint convert(int line, int column, int maxColumn);
-Board *copyBoard(Board *toCopy);
+
 
 void countColors(Board *board) {
 
@@ -99,21 +99,28 @@ uint convert(int line, int column, int maxColumn){
     return (line - 1) * maxColumn + column -1;
 }
 
-MoveList *removeCluster(Board *board, Vector2 tile) {
+MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
 
     //printf("removing cluster at %i %i\n", tile.x, tile.y);
-    Board *copy = copyBoard(board);
+    Board *copy = copyBoard(lastMove);
     uint tilesInCluster = 0;
     int color, id;
     color = copy->tiles[tile.y-1][tile.x-1].x;
     id = copy->tiles[tile.y-1][tile.x-1].y;
-    MoveList *move = (MoveList *) malloc(sizeof(MoveList));
-    
+
+    MoveList *move = NULL;
+
+    if (!lastMove->previous) {
+        move = (MoveList *) malloc(sizeof(MoveList));
+        move->previous = NULL;
+    } else move = lastMove->previous;
+
     for (uint line = 1; line <= copy->lines; line++) {
         for (uint column = 1; column <= copy->columns; column++) {
             if (copy->tiles[line-1][column-1].y == id) {
                 copy->tiles[line - 1][column - 1].x = -1;
                 tilesInCluster++;
+                copy->colors[color-1]--;
             }
         }
     }
@@ -123,7 +130,8 @@ MoveList *removeCluster(Board *board, Vector2 tile) {
     move->color = color;
 
     move->score = tilesInCluster * (tilesInCluster - 1);
-    move->next = NULL;
+    move->next = lastMove;
+    
     move->clusters = NULL;
 
     applyGravity(copy);
@@ -206,11 +214,13 @@ uint hopeless(Board *board, int goal, MoveList *head) {
     return 0;
 }
 
-Board *copyBoard(Board *toCopy){
+Board *copyBoard(MoveList *move){
     //printf("copying board..\n");
     //showBoard(toCopy);
-    Board *copied = (Board*) malloc (sizeof(*copied));
-
+    Board *copied;
+    if (!move->previous) copied = (Board*) malloc (sizeof(*copied));
+    else copied = move->previous->board;
+    Board *toCopy = move->board;
     copied->lines = toCopy->lines;
     copied->columns = toCopy->columns;
     copied->variant = toCopy->variant;

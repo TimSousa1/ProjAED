@@ -65,10 +65,11 @@ typedef struct _moveList {
     Board *board;
 
     struct _moveList *next;
+    struct _moveList *previous;
 } MoveList;
 
 Board *getBoard(FILE*, int *error);
-Board *copyBoard(Board*);
+Board *copyBoard(MoveList*);
 void freeBoard(Board *board);
 
 void countColors(Board *board);
@@ -81,7 +82,7 @@ int findTopSweep(Board*);
 Vector2 findBottomSweep(Board*, Vector2 play);
 int findLargest(Board*);
 
-MoveList *removeCluster(Board *board, Vector2 tile);
+MoveList *removeCluster(MoveList *lastMove, Vector2 tile);
 void resetClusterSets(Board*);
 
 VectorList *addToVectorList(VectorList *head, Vector2 tile);

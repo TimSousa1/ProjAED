@@ -57,8 +57,7 @@ int main(int argc, char **argv){
         countColors(board);
         showBoard(board);
 
-        copy = copyBoard(board);
-        answer = solve(copy);
+        answer = solve(board);
         
         /* Writing to the output file */
         writeFile(fileOut, board, answer);

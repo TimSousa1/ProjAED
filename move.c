@@ -95,7 +95,7 @@ Solution solve(Board *board) {
             //printf("%i ", head->score);
             if (current->board->variant >= -1 && current->score > current->board->variant) {
                 solution = createSolution(current);
-                freeMoveList(current);
+                freeMoveList(origin);
                 return solution;
             }
             if (current->board->variant == -3 && current->score > target) {
@@ -109,38 +109,36 @@ Solution solve(Board *board) {
             //printf("--reverting--\n\n");
             //showMoveList(head);
 
-            current = revertMove(current);
+            current = current->next;
 
             //showBoard(board);
             //showMoveList(current);
             continue;
         }
-        previous = current;
 
         //showBoard(board);
         //printf("--removing--\n\n");
         //printf("%i\n", id);
     
-        current = removeCluster(current->board,  current->clusters->tile);
+        current = removeCluster(current,  current->clusters->tile);
 
         //printf("%i %printf("empty tile! moving on..\n");i\n", head->tile.y, head->tile.x);
         //showBoard(board);
         //printf("--falling--\n\n");
 
         //showBoard(board);
-        if (previous) {
-            current->score += previous->score;
-            previous->clusters = removeVector(previous->clusters);
+        if (current->next) {
+            current->score += current->next->score;
+            current->next->clusters = removeVector(current->next->clusters);
         }
-        current->next = previous;
 
         //showBoard(board);
         //showMoveList(current);
-        showVectorList(current->clusters);
+        //showVectorList(current->clusters);
         //showTileList(head->tileHead);
     }
     //showBoard(board);
-    free(origin);
+    freeMoveList(origin);
     //printf("%p\n", solution);
     return solution;
 }
@@ -159,7 +157,7 @@ void freeMoveList(MoveList *head) {
         }
         freeBoard(head->board);
         moveTmp = head;
-        head = head->next;
+        head = head->previous;
         free(moveTmp);
     }
     return;
