@@ -35,75 +35,63 @@ VectorList *mergeVectorList(VectorList *first, VectorList *second) {
     return first;
 }
 
-VectorList *findCluster(Board *board, int line, int column, int clusterColor, int originalID, bool toRemove) {
-    printf("finding cluster on tile (%i %i)..\n", column, line);
+int findCluster(Board *board, int line, int column, int clusterColor, int originalID, bool toRemove){
+   // printf("finding cluster on tile (%i %i)..\n", line, column);
     if (line > board->lines || line <= 0 ||
             column > board->columns || column <= 0)
-    {printf("tile (%i %i) out of bounds!\n", column, line);return NULL;}
+    {/*printf("tile out of bounds!\n");*/return 0;}
 
     int color;
     color = board->tiles[line - 1][column - 1].x;
     
     if (color != clusterColor || color < 1)
-    {printf("tile (%i %i) already on set or empty!\n", column, line);return NULL;}
+    {/*printf("tile already on set or empty!\n");*/return 0;}
 
-    VectorList *tile = (VectorList *) malloc(sizeof(VectorList));
-    tile->next = NULL;
-    tile->tile = (Vector2) {column, line};
-    printf("adding tile (%i %i) to clusterSet..\n", column, line);
+    int tilesInCluster;
+    tilesInCluster = 1;
+    board->tiles[line - 1][column - 1].y = originalID;
+    //printf("adding tile to clusterSet..\n");
 
     // temporarily making the tile unavailable
     board->tiles[line-1][column-1].x = -1;
-    board->tiles[line-1][column-1].y = originalID;
 
-    VectorList *newTile, *tmp;
-    newTile = findCluster(board, line + 1, column, clusterColor, originalID, toRemove); // up
-    if (newTile) printf("got a new tile at %i %i\n", newTile->tile.x, newTile->tile.y);
-    else printf("no eligible tile found\n");
-    tile = mergeVectorList(tile, newTile);
-
-    newTile = findCluster(board, line - 1, column, clusterColor, originalID, toRemove); // down
-    tile = mergeVectorList(tile, newTile);
-
-    newTile = findCluster(board, line, column - 1, clusterColor, originalID, toRemove); // left
-    tile = mergeVectorList(tile, newTile);
-
-    newTile = findCluster(board, line, column + 1, clusterColor, originalID, toRemove); //right
-    tile = mergeVectorList(tile, newTile);
+    tilesInCluster += findCluster(board, line + 1, column, clusterColor, originalID, toRemove); // up
+    tilesInCluster += findCluster(board, line - 1, column, clusterColor, originalID, toRemove); // down
+    tilesInCluster += findCluster(board, line, column - 1, clusterColor, originalID, toRemove); // left
+    tilesInCluster += findCluster(board, line, column + 1, clusterColor, originalID, toRemove); //right
 
     // reassigning the tile its original color
     if (!toRemove) board->tiles[line-1][column-1].x = color;
     else board->colors[color-1]--;
 
-    return tile;
+    return tilesInCluster;
 }
 
 VectorList *findAllClusters(Board* board){
-    printf("initializing search for all clusters..\n");
+    //printf("initializing search for all clusters..\n");
     int tilesInCluster;
     int color;
     int id;
     VectorList *head = NULL, *cluster = NULL;
-
+    //showBoard(board);
     for (uint line = board->lines; line > 0; line--){
         for (uint column = 1; column <= board->columns; column++){
-            showID(board);
-            showBoard(board);
-            printf("on tile (%i %i)\n", column, line);
+            //showBoard(board);
+            //printf("on tile (%i %i)\n", column, line);
             color = board->tiles[line-1][column-1].x;
-            if (color == -1) {printf("empty tile! moving on..\n");continue;}
+            if (color == -1) {/*printf("empty tile! moving on..\n");*/continue;}
             id = convert(line, column, board->columns);
-            printf("id %i\n", id);
+            //printf("id %i\n", id);
             if (id == board->tiles[line-1][column-1].y && color != -1){
-                printf("tile not on a clusterSet!\n");
-                cluster = findCluster(board, line, column, color, id, 0); // finding a single cluster
-                if (cluster->next) {
-                    head = addToVectorList(head, cluster->tile);
+                //printf("tile not on a clusterSet!\n");
+                tilesInCluster = findCluster(board, line, column, color, id, 0); // finding a single cluster
+                if (tilesInCluster > 1) {
+                    head = addToVectorList(head, (Vector2 ) {column, line});
                 }
-                freeVectorList(cluster); 
             }
         }
     }
+    //showVectorList(head);
     return head;
 }
 
@@ -113,49 +101,45 @@ uint convert(int line, int column, int maxColumn){
 
 MoveList *removeCluster(Board *board, Vector2 tile) {
 
-    printf("removing cluster at %i %i\n", tile.x, tile.y);
+    //printf("removing cluster at %i %i\n", tile.x, tile.y);
     Board *copy = copyBoard(board);
-    uint totalTiles = 0;
+    uint tilesInCluster = 0;
     int color;
     color = copy->tiles[tile.y-1][tile.x-1].x;
     MoveList *move = (MoveList *) malloc(sizeof(MoveList));
     
     VectorList *found;
-    found = findCluster(copy, tile.y, tile.x, color, -1, 1);
+    tilesInCluster = findCluster(copy, tile.y, tile.x, color, -1, 1);
 
     move->tile = tile;
     move->id = convert(tile.y, tile.x, copy->columns);
     move->color = color;
 
-    for (VectorList *current = found; current; current = current->next) totalTiles++;
-    if (totalTiles < 2) copy->tiles[found->tile.y-1][found->tile.x-1].x = color;
-
-    freeVectorList(found);
-
-    move->score = totalTiles * (totalTiles - 1);
+    move->score = tilesInCluster * (tilesInCluster - 1);
     move->next = NULL;
     move->clusters = NULL;
 
+    applyGravity(copy);
     resetClusterSets(copy);
     move->clusters = findAllClusters(copy);
 
     move->board = copy;
-    printf("board after removal..\n");
-    showBoard(move->board);
+    //printf("board after removal..\n");
+    //showBoard(move->board);
     return move;
 }
 
 void resetClusterSets(Board* board) {
-    printf("board reset requested for board:\n");
-    showBoard(board);
+    //printf("board reset requested for board:\n");
+    //showBoard(board);
 
-    printf("with id:\n");
-    showID(board);
+    //printf("with id:\n");
+    //showID(board);
 
     for (uint line = 1; line <= board->lines; line++) {
         for (uint column = 1; column <= board->columns; column++) {
             board->tiles[line-1][column-1].y = convert(line, column, board->columns);
-            printf("resetting tile %i %i back to id %i\n", column, line, board->tiles[line-1][column-1].y);
+            //printf("resetting tile %i %i back to id %i\n", column, line, board->tiles[line-1][column-1].y);
         }
     }
 }
@@ -216,8 +200,8 @@ uint hopeless(Board *board, int goal, MoveList *head) {
 }
 
 Board *copyBoard(Board *toCopy){
-    printf("copying board..\n");
-    showBoard(toCopy);
+    //printf("copying board..\n");
+    //showBoard(toCopy);
     Board *copied = (Board*) malloc (sizeof(*copied));
 
     copied->lines = toCopy->lines;
@@ -241,8 +225,8 @@ Board *copyBoard(Board *toCopy){
             copied->tiles[line][column] = toCopy->tiles[line][column];
         }
     }
-    printf("resulting board..\n");
-    showBoard(copied);
+    //printf("resulting board..\n");
+    //showBoard(copied);
     return copied;
 }
 

@@ -73,7 +73,7 @@ void freeBoard(Board *board);
 
 void countColors(Board *board);
 
-VectorList *findCluster(Board*, int line, int column, int color, int id, bool toRemove);
+int findCluster(Board*, int line, int column, int color, int id, bool toRemove);
 VectorList *findAllClusters(Board*);
 
 int idSweep(Board *board, int lastID);

@@ -22,7 +22,7 @@ VectorList *removeVector(VectorList *head) {
 }
 
 MoveList *revertMove(MoveList* lastMove) {
-    MoveList *current = lastMove->next;
+    MoveList *current = lastMove->next, *moveTmp;
 
     VectorList *tmp;
     while (lastMove->clusters) {
@@ -30,7 +30,9 @@ MoveList *revertMove(MoveList* lastMove) {
         lastMove->clusters = lastMove->clusters->next;
         free(tmp);
     }
-    freeMoveList(lastMove);
+    
+    freeBoard(lastMove->board);
+    free(lastMove);
     return current;
 }
 
@@ -83,11 +85,11 @@ Solution solve(Board *board) {
 
     while (1) {
 
-        showVectorList(current->clusters);
+        //showVectorList(current->clusters);
         if (!current->clusters || hopeless(current->board, target, current)) {
-            printf("no clusters found!\n");
+            //printf("no clusters found!\n");
             if (origin == current) {
-                printf("leaving..\n");
+                //printf("leaving..\n");
                 break;
             } 
             //printf("%i ", head->score);
@@ -121,11 +123,10 @@ Solution solve(Board *board) {
         
         current = removeCluster(current->board, current->clusters->tile);
 
-        //printf("%i %i\n", head->tile.y, head->tile.x);
+        //printf("%i %printf("empty tile! moving on..\n");i\n", head->tile.y, head->tile.x);
         //showBoard(board);
         //printf("--falling--\n\n");
-        
-        applyGravity(current->board);
+
         //showBoard(board);
         if (previous) {
             current->score += previous->score;
@@ -134,8 +135,8 @@ Solution solve(Board *board) {
         current->next = previous;
 
         //showBoard(board);
-        showMoveList(current);
-        showVectorList(current->clusters);
+        //showMoveList(current);
+        //showVectorList(current->clusters);
         //showTileList(head->tileHead);
     }
     //showBoard(board);
