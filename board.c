@@ -104,15 +104,22 @@ MoveList *removeCluster(Board *board, Vector2 tile) {
     //printf("removing cluster at %i %i\n", tile.x, tile.y);
     Board *copy = copyBoard(board);
     uint tilesInCluster = 0;
-    int color;
+    int color, id;
     color = copy->tiles[tile.y-1][tile.x-1].x;
+    id = copy->tiles[tile.y-1][tile.x-1].y;
     MoveList *move = (MoveList *) malloc(sizeof(MoveList));
     
-    VectorList *found;
-    tilesInCluster = findCluster(copy, tile.y, tile.x, color, -1, 1);
+    for (uint line = 1; line <= copy->lines; line++) {
+        for (uint column = 1; column <= copy->columns; column++) {
+            if (copy->tiles[line-1][column-1].y == id) {
+                copy->tiles[line - 1][column - 1].x = -1;
+                tilesInCluster++;
+            }
+        }
+    }
 
     move->tile = tile;
-    move->id = convert(tile.y, tile.x, copy->columns);
+    move->id = id;
     move->color = color;
 
     move->score = tilesInCluster * (tilesInCluster - 1);
@@ -277,9 +284,10 @@ void showTileList(TileList *tiles) {
 
 void showVectorList(VectorList *head){
 
-    printf("printing a VectorList..\n");
+
     VectorList *aux;
     for (aux = head; aux; aux = aux->next) {
         printf("%i %i\n", aux->tile.x, aux->tile.y);
     }
+    printf("------\n");
 }

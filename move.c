@@ -120,8 +120,8 @@ Solution solve(Board *board) {
         //showBoard(board);
         //printf("--removing--\n\n");
         //printf("%i\n", id);
-        
-        current = removeCluster(current->board, current->clusters->tile);
+    
+        current = removeCluster(current->board,  current->clusters->tile);
 
         //printf("%i %printf("empty tile! moving on..\n");i\n", head->tile.y, head->tile.x);
         //showBoard(board);
@@ -136,7 +136,7 @@ Solution solve(Board *board) {
 
         //showBoard(board);
         //showMoveList(current);
-        //showVectorList(current->clusters);
+        showVectorList(current->clusters);
         //showTileList(head->tileHead);
     }
     //showBoard(board);
