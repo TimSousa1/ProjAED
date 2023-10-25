@@ -38,51 +38,78 @@ VectorList *mergeVectorList(VectorList *first, VectorList *second) {
 // .y = 0bxy
 //        x .. vertical gravity
 //        y .. horizontal gravity
-Vector2 findCluster(Board *board, int line, int column, int clusterColor, int originalID, bool toRemove){
-    Vector2 ret = {.x = 0, .y = 0b00};
+int findCluster(Board *board, int line, int column, int clusterColor, int originalID){
    // printf("finding cluster on tile (%i %i)..\n", line, column);
-    if (line > board->lines || line <= 0 ||
-            column > board->columns || column <= 0) return ret;
 
     int color;
     color = board->tiles[line - 1][column - 1].x;
     
-    if (color < 1) return ret;
-    if (color != clusterColor){
-        ret.y = 0b11;
-        return ret;
-    }
-    ret.x = 1; // tilesInCluster = 1
+    if (color < 1) return 0;
+
+    int tilesInCluster = 1; // tilesInCluster = 1
     board->tiles[line-1][column-1].y = originalID;
     //printf("adding tile to clusterSet..\n");
 
     // temporarily making the tile unavailable
     board->tiles[line-1][column-1].x = -1;
 
-    Vector2 found = {.x = 0, .y = 0};
-    found = findCluster(board, line + 1, column, clusterColor, originalID, toRemove); // up
-    ret.x += found.x;
-    ret.y = ret.y | found.y;
-
-    found = findCluster(board, line - 1, column, clusterColor, originalID, toRemove); // down
-    ret.x += found.x;
-    ret.y = ret.y | found.y;
-
-    found = findCluster(board, line, column - 1, clusterColor, originalID, toRemove); // left
-    ret.x += found.x;
-    ret.y = ret.y | found.y;
-
-    found = findCluster(board, line, column + 1, clusterColor, originalID, toRemove); //right
-    ret.x += found.x;
-    ret.y = ret.y | found.y;
+    if (line+1 <= board->lines){
+        if (board->tiles[line - 1+1][column - 1].x == clusterColor) 
+            tilesInCluster += findCluster(board, line + 1, column, clusterColor, originalID); // up
+    }
+    if (line-1 > 0 ){
+        if (board->tiles[line - 1-1][column - 1].x == clusterColor) 
+            tilesInCluster += findCluster(board, line - 1, column, clusterColor, originalID); // down
+    }
+    if (column-1 > 0){
+        if (board->tiles[line - 1][column - 1-1].x == clusterColor) 
+            tilesInCluster += findCluster(board, line, column - 1, clusterColor, originalID); // left
+    }
+    if (column+1 <= board->columns ){
+        if (board->tiles[line - 1][column - 1+1].x == clusterColor) 
+            tilesInCluster += findCluster(board, line, column + 1, clusterColor, originalID); //right
+    }
 
     // reassigning the tile its original color
-    if (!toRemove) board->tiles[line-1][column-1].x = color;
-    else board->colors[color-1]--;
+    board->tiles[line-1][column-1].x = color;
 
-    return ret;
+    return tilesInCluster;
 }
 
+int blastCluster(Board *board, int line, int column, int clusterColor, int originalID){
+   // printf("finding cluster on tile (%i %i)..\n", line, column);
+
+    int color;
+    color = board->tiles[line - 1][column - 1].x;
+    
+    if (color < 1) return 0;
+
+    int tilesInCluster = 1; // tilesInCluster = 1
+    board->tiles[line-1][column-1].y = originalID;
+    //printf("adding tile to clusterSet..\n");
+
+    // temporarily making the tile unavailable
+    board->tiles[line-1][column-1].x = -1;
+
+    if (line+1 <= board->lines){
+        if (board->tiles[line - 1+1][column - 1].x == clusterColor) 
+            tilesInCluster += blastCluster(board, line + 1, column, clusterColor, originalID); // up
+    }
+    if (line-1 > 0 ){
+        if (board->tiles[line - 1-1][column - 1].x == clusterColor) 
+            tilesInCluster += blastCluster(board, line - 1, column, clusterColor, originalID); // down
+    }
+    if (column-1 > 0){
+        if (board->tiles[line - 1][column - 1-1].x == clusterColor) 
+            tilesInCluster += blastCluster(board, line, column - 1, clusterColor, originalID); // left
+    }
+    if (column+1 <= board->columns ){
+        if (board->tiles[line - 1][column - 1+1].x == clusterColor) 
+            tilesInCluster += blastCluster(board, line, column + 1, clusterColor, originalID); //right
+    }
+
+    return tilesInCluster;
+}
 VectorList *findAllClusters(Board* board){
     //printf("initializing search for all clusters..\n");
     int tilesInCluster;
@@ -101,8 +128,8 @@ VectorList *findAllClusters(Board* board){
             //printf("id %i\n", id);
             if (id == board->tiles[line-1][column-1].y && color != -1){
                 //printf("tile not on a clusterSet!\n");
-                clusterOut = findCluster(board, line, column, color, id, 0); // finding a single cluster
-                if (clusterOut.x > 1) {
+                tilesInCluster = findCluster(board, line, column, color, id); // finding a single cluster
+                if (tilesInCluster > 1) {
                     head = addToVectorList(head, (Vector2 ) {column, line});
                 }
             }
@@ -136,15 +163,8 @@ MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
         freeVectorList(move->clusters);
     }
 
-    for (uint line = 1; line <= copy->lines; line++) {
-        for (uint column = 1; column <= copy->columns; column++) {
-            if (copy->tiles[line-1][column-1].y == id) {
-                copy->tiles[line-1][column-1].x = -1;
-                tilesInCluster++;
-                copy->colors[color-1]--;
-            }
-        }
-    }
+    tilesInCluster = blastCluster(copy, tile.y, tile.x, color, id);
+    copy->colors[color-1] -= tilesInCluster;
     
     move->tile = tile;
     move->id = id;
