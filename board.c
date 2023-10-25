@@ -217,25 +217,32 @@ uint hopeless(Board *board, int goal, MoveList *head) {
 Board *copyBoard(MoveList *move){
     //printf("copying board..\n");
     //showBoard(toCopy);
-    Board *copied;
-    if (!move->previous) copied = (Board*) malloc (sizeof(*copied));
-    else copied = move->previous->board;
-    Board *toCopy = move->board;
+    Board *toCopy = NULL, *copied = NULL;
+    toCopy = move->board;
+
+    if (!move->previous) {
+        copied = (Board*) malloc (sizeof(*copied));
+        copied->colors = (uint*) calloc (toCopy->numColors, sizeof(uint));
+        copied->tiles = (Vector2 **) malloc (toCopy->lines * sizeof(Vector2 *));
+
+        for (uint k = 0; k < toCopy->lines; k++) {
+            copied->tiles[k] = (Vector2 *) malloc (toCopy->columns * sizeof(Vector2));
+        }
+    }
+    else {
+        copied = move->previous->board;
+        copied->colors = toCopy->colors;
+        copied->tiles = toCopy->tiles;
+    }
+
     copied->lines = toCopy->lines;
     copied->columns = toCopy->columns;
     copied->variant = toCopy->variant;
     copied->numColors = toCopy->numColors;
 
-    copied->colors = (uint*) calloc (toCopy->numColors, sizeof(uint));
 
     for (int i = 0; i < toCopy->numColors; i++)
         copied->colors[i] = toCopy->colors[i];
-
-    copied->tiles = (Vector2 **) malloc (copied->lines * sizeof(Vector2 *));
-
-    for (uint k = 0; k < copied->lines; k++) {
-        copied->tiles[k] = (Vector2 *) malloc (copied->columns * sizeof(Vector2));
-    }
 
     for (int line = 0; line < toCopy->lines; line++){
         for (int column = 0; column < toCopy->columns; column++){

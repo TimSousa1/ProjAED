@@ -109,6 +109,7 @@ Solution solve(Board *board) {
             //printf("--reverting--\n\n");
             //showMoveList(head);
 
+            current->next->previous = current;
             current = current->next;
 
             //showBoard(board);
@@ -146,15 +147,10 @@ Solution solve(Board *board) {
 void freeMoveList(MoveList *head) {
 
     MoveList *moveTmp;
-    TileList *tileTmp;
     VectorList *vectorTmp;
 
     while (head) {
-        while (head->clusters) {
-            vectorTmp = head->clusters;
-            head->clusters = head->clusters->next;
-            free(vectorTmp);
-        }
+        freeVectorList(head->clusters);
         freeBoard(head->board);
         moveTmp = head;
         head = head->previous;
@@ -165,14 +161,12 @@ void freeMoveList(MoveList *head) {
 
 void freeVectorList(VectorList *head) {
 
-    if (!head) return;
     VectorList *tmp;
     while (head) {
         tmp = head;
         head = head->next;
         free(tmp);
     }
-
 }
 
 void showMoveList(MoveList *move) {
