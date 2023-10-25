@@ -100,16 +100,16 @@ char *outputName(char *inputName) {
  * Description: writes to the output file the answer to the problem according to its variant
  *****************************************************************************/
 
-void writeFile(FILE *file, Board *board, Solution allMoves) {
+void writeFile(FILE *file, Vector2 boardSize, int variant, Solution allMoves) {
 
     uint moves;
     VectorList *move;
 
     /* Writing the problem header */
     fprintf(file, "%i %i %i\n",
-                board->lines, board->columns, board->variant);
+                boardSize.y, boardSize.x, variant);
     if (!allMoves.moves) {
-        if (board->variant >= 0) {
+        if (variant >= 0) {
             fprintf(file, "0 -1\n\n");
             return;
         } else {

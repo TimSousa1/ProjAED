@@ -76,6 +76,7 @@ Solution solve(Board *board) {
     origin->color = -1;
     origin->clusters = NULL;
     origin->next = NULL;
+    origin->previous = NULL;
     origin->board = board;
 
     resetClusterSets(origin->board);
@@ -109,7 +110,6 @@ Solution solve(Board *board) {
             //printf("--reverting--\n\n");
             //showMoveList(head);
 
-            current->next->previous = current;
             current = current->next;
 
             //showBoard(board);
@@ -139,6 +139,7 @@ Solution solve(Board *board) {
         //showTileList(head->tileHead);
     }
     //showBoard(board);
+    showMoveList(origin);
     freeMoveList(origin);
     //printf("%p\n", solution);
     return solution;
@@ -171,11 +172,11 @@ void freeVectorList(VectorList *head) {
 
 void showMoveList(MoveList *move) {
     printf("--------\n");
-    for (MoveList *aux = move; aux; aux=aux->next) {
+    for (MoveList *aux = move; aux; aux=aux->previous) {
         printf("%i %i\n", aux->tile.y, aux->tile.x);
+        showBoard(aux->board);
     }
     printf("color: %i id: %i score: %i\n",
             move->color, move->id, move->score);
     printf("--------\n\n");
-    showBoard(move->board);
 }

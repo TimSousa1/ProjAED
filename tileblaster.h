@@ -74,7 +74,7 @@ void freeBoard(Board *board);
 
 void countColors(Board *board);
 
-int findCluster(Board*, int line, int column, int color, int id, bool toRemove);
+Vector2 findCluster(Board*, int line, int column, int color, int id, bool toRemove);
 VectorList *findAllClusters(Board*);
 
 int idSweep(Board *board, int lastID);
@@ -104,6 +104,6 @@ void showVectorList(VectorList*);
 
 
 char *outputName(char *inputName);
-void writeFile(FILE *file, Board *board, Solution answer);
+void writeFile(FILE *file, Vector2 boardSize, int variant, Solution answer);
 
 #endif

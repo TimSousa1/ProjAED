@@ -12,8 +12,9 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     /* Allocating memory to know if there are any problems with the problem format */
-    int error, color, id;
+    int error, color, id, variant;
     uint total, line, column, tiles;
+    Vector2 boardSize;
 
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
@@ -57,10 +58,13 @@ int main(int argc, char **argv){
         countColors(board);
         showBoard(board);
 
+        boardSize.x = board->columns;
+        boardSize.y = board->lines;
+        variant = board->variant;
         answer = solve(board);
         
         /* Writing to the output file */
-        writeFile(fileOut, board, answer);
+        writeFile(fileOut, boardSize, variant, answer);
         freeVectorList(answer.moves);
     }
     /* Freeing the variable error and closing the files before closing the programm */
