@@ -12,8 +12,8 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     /* Allocating memory to know if there are any problems with the problem format */
-    int error, color, id;
-    uint total, score, line, column, tiles;
+    int error, variant;
+    Vector2 boardSize;
 
     /* Creating the name for the output file */
     char *filenameIn = argv[1];
@@ -31,14 +31,11 @@ int main(int argc, char **argv){
     if (!fileIn || !fileOut) return ERROR_FILE;
     
     Board *board;
-    MoveList *moveHead;
+    Solution answer;
     
     error = 0;
     /* Reading a single problem and creating a board for it */
     while ((board = getBoard(fileIn, &error))){
-        /* Reseting error */
-        total = 0;
-
         /* Checking if the problem is invalid or not */
         if (error == 1) {
             error = 0;
@@ -51,28 +48,18 @@ int main(int argc, char **argv){
             continue;
         }
         error = 0;
-        moveHead = NULL;
-        while (1){
-            //showboard(board);
-            //showID(board);
+        answer.score = 0;
+        answer.moves = NULL;
+        countColors(board);
 
-            id = findTopSweep(board);
-            if (id == -1) break;
-
-            tiles = removeCluster(board, id);
-            resetClusterSets(board);
-
-            applyGravity(board);
-            moveHead = moveListAdd(moveHead, line, column);
-            board->score += tiles * (tiles - 1);
-            showBoard(board);
-            printf("score: %i\n", board->score);
-            showID(board);
-        }
+        boardSize.x = board->columns;
+        boardSize.y = board->lines;
+        variant = board->variant;
+        answer = solve(board);
+        
         /* Writing to the output file */
-        writeFile(fileOut, board, moveHead, score);
-        freeMoveList(moveHead);
-        freeBoard(board);
+        writeFile(fileOut, boardSize, variant, answer);
+        freeVectorList(answer.moves);
     }
     /* Freeing the variable error and closing the files before closing the programm */
     free(filenameOut);
