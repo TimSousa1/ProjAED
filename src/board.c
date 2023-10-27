@@ -23,7 +23,7 @@ uint convert(int line, int column, int maxColumn){
  * Returns: nothing
  * Side-Effects: none
  *
- * Description: Calculates the equivalent id for a coordinate
+ * Description: Counts how many tiles are of each color and stores it in boaed->colors
  *****************************************************************************/
 
 void countColors(Board *board) {
@@ -36,29 +36,17 @@ void countColors(Board *board) {
     }
 }
 
-Vector2 convertToCoordinates(int id, int columns) {
-    Vector2 ret;
-    ret.x = id % columns + 1;
-    ret.y = id / columns + 1;
-    return ret;
-}
+/******************************************************************************
+ * findCluster()
+ *
+ * Arguments: Board *board, int line, int column, int clusterColor and int originalID
+ * Returns: int tilesInCluster
+ * Side-Effects: Changes every tile in the cluster to the same id
+ *
+ * Description: finds every tile that belongs to the same cluster and returns how many tiles
+                there are in the cluster
+ *****************************************************************************/
 
-VectorList *mergeVectorList(VectorList *first, VectorList *second) {
-    if (!first || !second) return first;
-    //printf("merging %i %i with %i %i\n", first->tile.x, first->tile.y, second->tile.x, second->tile.y );
-
-    VectorList *last;
-
-    for (last = first; last->next;) last = last->next;
-    last->next = second;
-
-    return first;
-}
-
-// .x = number of tiles in the cluster
-// .y = 0bxy
-//        x .. vertical gravity
-//        y .. horizontal gravity
 int findCluster(Board *board, int line, int column, int clusterColor, int originalID){
    // printf("finding cluster on tile (%i %i)..\n", line, column);
 
@@ -97,6 +85,17 @@ int findCluster(Board *board, int line, int column, int clusterColor, int origin
     return tilesInCluster;
 }
 
+/******************************************************************************
+ * blastCluster()
+ *
+ * Arguments: Board *board, int line, int column, int clusterColor and int originalID
+ * Returns: int tilesInCluster
+ * Side-Effects: Changes every tile in the cluster to the same id and removes them
+ *
+ * Description: finds every tile that belongs to the same cluster, removing them, 
+                and returns how many tiles there are in the cluster
+ *****************************************************************************/
+
 int blastCluster(Board *board, int line, int column, int clusterColor, int originalID){
    // printf("finding cluster on tile (%i %i)..\n", line, column);
 
@@ -131,6 +130,18 @@ int blastCluster(Board *board, int line, int column, int clusterColor, int origi
 
     return tilesInCluster;
 }
+
+/******************************************************************************
+ * findAllCluster()
+ *
+ * Arguments: Board *board
+ * Returns: VectorList *head
+ * Side-Effects: Runs findCluster() for every valid tile, check the side effects of findCluster for more
+ *
+ * Description: Obtains all possible valid moves for the current board and returns them in the form
+                of a list of coordinates
+ *****************************************************************************/
+
 VectorList *findAllClusters(Board* board){
     //printf("initializing search for all clusters..\n");
     int tilesInCluster;
@@ -147,7 +158,7 @@ VectorList *findAllClusters(Board* board){
             if (color == -1) {/*printf("empty tile! moving on..\n");*/break;}
             id = convert(line, column, board->columns);
             //printf("id %i\n", id);
-            if (id == board->tiles[line-1][column-1].y && color != -1){
+            if (id == board->tiles[line-1][column-1].y){
                 //printf("tile not on a clusterSet!\n");
                 tilesInCluster = findCluster(board, line, column, color, id); // finding a single cluster
                 if (tilesInCluster > 1) {
@@ -159,6 +170,16 @@ VectorList *findAllClusters(Board* board){
     //showVectorList(head);
     return head;
 }
+
+/******************************************************************************
+ * removeCluster()
+ *
+ * Arguments: MoveList *lastMove and Vector2 tile
+ * Returns: MoveList *move
+ * Side-Effects: Creates a new MoveList and blasts the cluster in the argument tile
+ *
+ * Description: Makes a move, creating a MoveList or changing if it already exists
+ *****************************************************************************/
 
 MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
 
@@ -204,6 +225,16 @@ MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
     return move;
 }
 
+/******************************************************************************
+ * resetClusterSets()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: none
+ *
+ * Description: Sets the id matrix to its original values
+ *****************************************************************************/
+
 void resetClusterSets(Board* board) {
     //printf("board reset requested for board:\n");
     //showBoard(board);
@@ -218,6 +249,16 @@ void resetClusterSets(Board* board) {
         }
     }
 }
+
+/******************************************************************************
+ * applyVerticalGravity()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: none
+ *
+ * Description: Simulates gravity where -1 means empty
+ *****************************************************************************/
 
 void applyVerticalGravity(Board *board){
 
@@ -243,6 +284,16 @@ void applyVerticalGravity(Board *board){
 
 }
 
+/******************************************************************************
+ * applyHorizontalGravity()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: none
+ *
+ * Description: Puts all empty columns in the left by sliding columns to the right
+ *****************************************************************************/
+
 void applyHorizontalGravity(Board *board){
 
     int line, column, counter;
@@ -263,10 +314,30 @@ void applyHorizontalGravity(Board *board){
     }
 }
 
+/******************************************************************************
+ * applyGravity()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: none
+ *
+ * Description: Applies both vertical and horizontal gravity
+ *****************************************************************************/
+
 void applyGravity(Board *board) {
     applyVerticalGravity(board);
     applyHorizontalGravity(board);
 }
+
+/******************************************************************************
+ * hopeless()
+ *
+ * Arguments: Board *board
+ * Returns: 0 if there is hope or 1 if there isn't
+ * Side-Effects: none
+ *
+ * Description: Sees if its possible to reach the desired score
+ *****************************************************************************/
 
 uint hopeless(Board *board, int goal, MoveList *head) {
 
@@ -283,6 +354,16 @@ uint hopeless(Board *board, int goal, MoveList *head) {
     //printf("Theres Hope!\n");
     return 0;
 }
+
+/******************************************************************************
+ * copyBoard()
+ *
+ * Arguments: MoveList *move
+ * Returns: Board *copied
+ * Side-Effects: none
+ *
+ * Description: creates a copy of the board
+ *****************************************************************************/
 
 Board *copyBoard(MoveList *move){
     //printf("copying board..\n");
@@ -337,6 +418,16 @@ Board *copyBoard(MoveList *move){
     //showBoard(copied);
     return copied;
 }
+
+/******************************************************************************
+ * freeBoard()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: none
+ *
+ * Description: Frees all memory allocated for a board
+ *****************************************************************************/
 
 void freeBoard(Board *board) {
 
