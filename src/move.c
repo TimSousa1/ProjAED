@@ -21,21 +21,6 @@ VectorList *removeVector(VectorList *head) {
 
 }
 
-MoveList *revertMove(MoveList* lastMove) {
-    MoveList *current = lastMove->next, *moveTmp;
-
-    VectorList *tmp;
-    while (lastMove->clusters) {
-        tmp = lastMove->clusters;
-        lastMove->clusters = lastMove->clusters->next;
-        free(tmp);
-    }
-    
-    freeBoard(lastMove->board);
-    free(lastMove);
-    return current;
-}
-
 Solution createSolution(MoveList *moves) {
     Solution answer;
 
@@ -57,12 +42,10 @@ Solution createSolution(MoveList *moves) {
 
 Solution solve(Board *board) {
 
-    MoveList *origin, *previous = NULL, *current;
-    int id;
+    MoveList *origin, *current;
     int target = board->variant;
 
     Solution solution;
-    VectorList *possibleMoves;
     
     solution.score = 0;
     solution.moves = NULL;
@@ -139,7 +122,6 @@ Solution solve(Board *board) {
         //showTileList(head->tileHead);
     }
     //showBoard(board);
-    showMoveList(origin);
     freeMoveList(origin);
     //printf("%p\n", solution);
     return solution;
@@ -148,7 +130,6 @@ Solution solve(Board *board) {
 void freeMoveList(MoveList *head) {
 
     MoveList *moveTmp;
-    VectorList *vectorTmp;
 
     while (head) {
         freeVectorList(head->clusters);

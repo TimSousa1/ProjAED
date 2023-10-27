@@ -29,14 +29,14 @@ Board *getBoard(FILE *file, int *error){
     // initializing the board matrix
     board->tiles = (Vector2 **) malloc (board->lines * sizeof(Vector2 *));
 
-    for (uint k = 0; k < board->lines; k++) {
+    for (int k = 0; k < board->lines; k++) {
         board->tiles[k] = (Vector2 *) malloc (board->columns * sizeof(Vector2));
     }
 
     // getting every element off of the file
     for (int line = board->lines - 1; line >= 0; line--){
         for (int column = 0; column < board->columns; column++){
-            fscanf(file, "%i", &board->tiles[line][column].x);
+            if (fscanf(file, "%i", &board->tiles[line][column].x) != 1) *error = 1;
             if (board->tiles[line][column].x > numColor) numColor = board->tiles[line][column].x;
         }
     }
@@ -50,7 +50,6 @@ Board *getBoard(FILE *file, int *error){
         *error = 1;
     }
     /* Returns the board created */
-    printf("got a new board!\n");
     return board;
 }
 
@@ -66,7 +65,7 @@ Board *getBoard(FILE *file, int *error){
     strcpy(name, inputName);
 
     extension = name + len - 10;
-    memcpy(extension, ".toleblists", 11);
+    memcpy(extension, ".tileblasts", 11);
 
     return name;
 }*/
@@ -74,7 +73,7 @@ Board *getBoard(FILE *file, int *error){
 char *outputName(char *inputName) {
 
     char *name;
-    char extension[] = ".toleblists\0";
+    char extension[] = ".tileblasts\0";
     uint len, i, j;
   
     len = strlen(inputName);

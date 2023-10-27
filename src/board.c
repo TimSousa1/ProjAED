@@ -7,8 +7,8 @@ uint convert(int line, int column, int maxColumn);
 
 void countColors(Board *board) {
 
-    for (uint line = 0; line < board->lines; line++) {
-        for (uint column = 0; column < board->columns; column++) {
+    for (int line = 0; line < board->lines; line++) {
+        for (int column = 0; column < board->columns; column++) {
             if (board->tiles[line][column].x > 0)
                 board->colors[board->tiles[line][column].x - 1]++;
         }
@@ -115,15 +115,15 @@ VectorList *findAllClusters(Board* board){
     int tilesInCluster;
     int color;
     int id;
-    VectorList *head = NULL, *cluster = NULL;
-    Vector2 clusterOut = {.x = 0, .y = 0};
+    VectorList *head = NULL;
     //showBoard(board);
-    for (uint line = board->lines; line > 0; line--){
-        for (uint column = 1; column <= board->columns; column++){
+    for (int column = board->columns; column > 0; column--){
+        if (board->tiles[0][column-1].x == -1) break;
+        for (int line = 1; line <= board->lines; line++){
             //showBoard(board);
             //printf("on tile (%i %i)\n", column, line);
             color = board->tiles[line-1][column-1].x;
-            if (color == -1) {/*printf("empty tile! moving on..\n");*/continue;}
+            if (color == -1) {/*printf("empty tile! moving on..\n");*/break;}
             id = convert(line, column, board->columns);
             //printf("id %i\n", id);
             if (id == board->tiles[line-1][column-1].y && color != -1){
@@ -192,8 +192,8 @@ void resetClusterSets(Board* board) {
     //printf("with id:\n");
     //showID(board);
 
-    for (uint line = 1; line <= board->lines; line++) {
-        for (uint column = 1; column <= board->columns; column++) {
+    for (int line = 1; line <= board->lines; line++) {
+        for (int column = 1; column <= board->columns; column++) {
             board->tiles[line-1][column-1].y = convert(line, column, board->columns);
             //printf("resetting tile %i %i back to id %i\n", column, line, board->tiles[line-1][column-1].y);
         }
@@ -253,10 +253,10 @@ uint hopeless(Board *board, int goal, MoveList *head) {
 
     if (goal < 0) return 0;
 
-    uint score = 0;
+    int score = 0;
     if (head) score = head->score; 
 
-    for (uint i = 0; i < board->numColors; i++) {
+    for (int i = 0; i < board->numColors; i++) {
         score += board->colors[i] * (board->colors[i]-1);
     }
     //printf("Max Possible score: %i\n", score);
@@ -276,7 +276,7 @@ Board *copyBoard(MoveList *move){
         copied->colors = (uint*) calloc (toCopy->numColors, sizeof(uint));
         copied->tiles = (Vector2 **) malloc (toCopy->lines * sizeof(Vector2 *));
 
-        for (uint k = 0; k < toCopy->lines; k++) {
+        for (int k = 0; k < toCopy->lines; k++) {
             copied->tiles[k] = (Vector2 *) malloc (toCopy->columns * sizeof(Vector2));
         }
     }

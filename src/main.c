@@ -12,8 +12,7 @@ int main(int argc, char **argv){
     if (argc != 2) return ERROR_ARGUMENTS;
 
     /* Allocating memory to know if there are any problems with the problem format */
-    int error, color, id, variant;
-    uint total, line, column, tiles;
+    int error, variant;
     Vector2 boardSize;
 
     /* Creating the name for the output file */
@@ -35,12 +34,8 @@ int main(int argc, char **argv){
     Solution answer;
     
     error = 0;
-    Board *copy = NULL;
     /* Reading a single problem and creating a board for it */
     while ((board = getBoard(fileIn, &error))){
-        /* Reseting error */
-        total = 0;
-
         /* Checking if the problem is invalid or not */
         if (error == 1) {
             error = 0;
@@ -56,7 +51,6 @@ int main(int argc, char **argv){
         answer.score = 0;
         answer.moves = NULL;
         countColors(board);
-        showBoard(board);
 
         boardSize.x = board->columns;
         boardSize.y = board->lines;

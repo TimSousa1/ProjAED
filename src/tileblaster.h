@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define uint unsigned int
+#define ushort unsigned short
+
 typedef struct Vector2 {
     int x;
     int y;
@@ -24,7 +27,7 @@ typedef struct _tileList{
 } TileList;
 
 typedef struct _solution {
-    uint score;
+    int score;
     VectorList *moves;
 } Solution;
 
@@ -49,7 +52,7 @@ typedef struct _board {
     int variant;
 
     uint *colors;
-    uint numColors;
+    int numColors;
 
     Vector2 **tiles;
 
