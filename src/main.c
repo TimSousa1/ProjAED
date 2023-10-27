@@ -11,7 +11,6 @@ int main(int argc, char **argv){
     /* Making sure the input filename has been supplied and nothing more */
     if (argc != 2) return ERROR_ARGUMENTS;
 
-    /* Allocating memory to know if there are any problems with the problem format */
     int error, variant;
     Vector2 boardSize;
 

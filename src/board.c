@@ -2,7 +2,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-uint convert(int line, int column, int maxColumn);
+/******************************************************************************
+ * convert()
+ *
+ * Arguments: int line, int column and int maxColumn
+ * Returns: uint <nameless>
+ * Side-Effects: none
+ *
+ * Description: Calculates the equivalent id for a coordinate
+ *****************************************************************************/
+
+uint convert(int line, int column, int maxColumn){
+    return (line - 1) * maxColumn + column -1;
+}
+
+/******************************************************************************
+ * countColors()
+ *
+ * Arguments: Board *board
+ * Returns: nothing
+ * Side-Effects: none
+ *
+ * Description: Calculates the equivalent id for a coordinate
+ *****************************************************************************/
 
 void countColors(Board *board) {
 
@@ -138,10 +160,6 @@ VectorList *findAllClusters(Board* board){
     return head;
 }
 
-uint convert(int line, int column, int maxColumn){
-    return (line - 1) * maxColumn + column -1;
-}
-
 MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
 
     //printf("removing cluster at %i %i\n", tile.x, tile.y);
@@ -156,7 +174,7 @@ MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
     if (!lastMove->previous) {
         move = (MoveList *) malloc(sizeof(MoveList));
         if (!move) {
-            printf("Error allocating memory for variable \"move\", in function removeCluster()!\n");
+            fprintf(stderr, "Error allocating memory for variable \"move\", in function removeCluster()!\n");
             exit(1);
         }
         move->previous = NULL;
@@ -275,25 +293,25 @@ Board *copyBoard(MoveList *move){
     if (!move->previous) {
         copied = (Board*) malloc (sizeof(*copied));
         if (!copied) {
-            printf("Error allocating memory for variable \"copied\", in function copyBoard()!\n");
+            fprintf(stderr, "Error allocating memory for variable \"copied\", in function copyBoard()!\n");
             exit(1);
         }
         copied->colors = (uint*) calloc (toCopy->numColors, sizeof(uint));
         if (!copied->colors) {
-            printf("Error allocating memory for variable \"copied->colors\", in function copyBoard()!\n");
+            fprintf(stderr, "Error allocating memory for variable \"copied->colors\", in function copyBoard()!\n");
             exit(1);
         }
         copied->tiles = (Vector2 **) malloc (toCopy->lines * sizeof(Vector2 *));
         if (!copied->tiles) {
-            printf("Error allocating memory for variable \"copied->tiles\", in function copyBoard()!\n");
+            fprintf(stderr, "Error allocating memory for variable \"copied->tiles\", in function copyBoard()!\n");
             exit(1);
         }
 
         for (int k = 0; k < toCopy->lines; k++) {
             copied->tiles[k] = (Vector2 *) malloc (toCopy->columns * sizeof(Vector2));
             if (!copied->tiles[k]) {
-            printf("Error allocating memory for variable \"copied->tiles[%i]\", in function copyBoard()!\n", k);
-            exit(1);
+                fprintf(stderr, "Error allocating memory for variable \"copied->tiles[%i]\", in function copyBoard()!\n", k);
+                exit(1);
             }
         }
     }

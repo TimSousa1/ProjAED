@@ -4,7 +4,7 @@
 #include <string.h>
 
 /******************************************************************************
- * readFile ()
+ * getBoard()
  *
  * Arguments: FILE *file and int *error
  * Returns: Board *board
@@ -17,7 +17,7 @@ Board *getBoard(FILE *file, int *error){
 
     Board *board = (Board *) malloc (sizeof(Board));
     if (!board) {
-        printf("Error allocating memory for variable \"board\", in function getBoard()!\n");
+        fprintf(stderr, "Error allocating memory for variable \"board\", in function getBoard()!\n");
         exit(1);
     }
     ushort numColor = 0;
@@ -33,14 +33,14 @@ Board *getBoard(FILE *file, int *error){
     board->tiles = (Vector2 **) malloc (board->lines * sizeof(Vector2 *));
 
     if (!board->tiles) {
-        printf("Error allocating memory for variable \"board->tiles\", in function getBoard()!\n");
+        fprintf(stderr, "Error allocating memory for variable \"board->tiles\", in function getBoard()!\n");
         exit(1);
     }
 
     for (int k = 0; k < board->lines; k++) {
         board->tiles[k] = (Vector2 *) malloc (board->columns * sizeof(Vector2));
         if (!board->tiles[k]) {
-            printf("Error allocating memory for variable \"board->tiles[%i]\", in function getBoard()!\n", k);
+            fprintf(stderr, "Error allocating memory for variable \"board->tiles[%i]\", in function getBoard()!\n", k);
             exit(1);
         }
     }
@@ -56,7 +56,7 @@ Board *getBoard(FILE *file, int *error){
 
     board->colors = (uint *)calloc(numColor, sizeof(uint));
     if (!board->colors) {
-        printf("Error allocating memory for variable \"board->colors\", in function getBoard()!\n");
+        fprintf(stderr, "Error allocating memory for variable \"board->colors\", in function getBoard()!\n");
         exit(1);
     }
     board->numColors = numColor;
@@ -69,28 +69,21 @@ Board *getBoard(FILE *file, int *error){
     return board;
 }
 
-/*char *outputName(char *inputName) {
-
-    char *name;
-    char *extension;
-    uint len;
-
-    len = strlen(inputName);
-
-    name = (char *) malloc((len + 2) * sizeof(char));
-    strcpy(name, inputName);
-
-    extension = name + len - 10;
-    memcpy(extension, ".tileblasts", 11);
-
-    return name;
-}*/
+/******************************************************************************
+ * outputName()
+ *
+ * Arguments: char *inputName
+ * Returns: char *outputName
+ * Side-Effects: none
+ *
+ * Description: creates the name for the output file. Returns NULL if the input name is invalid
+ *****************************************************************************/
 
 char *outputName(char *inputName) {
 
-    char *name, *checkName;
-    char inputExtension[] = ".tilewalls\0";
-    char outputExtension[] = ".tileblasts\0";
+    char *outputName, *checkName;
+    char inputExtension[] = ".tilewalls";
+    char outputExtension[] = ".tileblasts";
     uint len, i, j;
   
     len = strlen(inputName);
@@ -98,33 +91,33 @@ char *outputName(char *inputName) {
     checkName = inputName + len - strlen(inputExtension);
     if (strcmp(checkName, inputExtension) != 0) return NULL;
 
-    name = (char *) malloc((len + 2) * sizeof(char));
-    if (!name) {
-        printf("Error allocating memory for varaible \"name\", in function outputName()!\n");
+    outputName = (char *) malloc((len + 2) * sizeof(char));
+    if (!outputName) {
+        fprintf(stderr, "Error allocating memory for varaible \"outputName\", in function outputName()!\n");
         exit(1);
     }
 
     for (i = 0; i < len - 10; i++) {
-        name[i] = inputName[i];
+        outputName[i] = inputName[i];
     }
     for (j = 0; i < len + 2; i++, j++) {
-        name[i] = outputExtension[j];
+        outputName[i] = outputExtension[j];
     }
 
-    return name;
+    return outputName;
 }
 
 /******************************************************************************
- * writeFile ()
+ * writeFile()
  *
- * Arguments: FILE *file, Board *board and int score
+ * Arguments: FILE *file, Vector2 boardSize, int variant and Solution answer
  * Returns: nothing
- * Side-Effects: changes the second argument (Board *) if it's the second variant
+ * Side-Effects: none
  *
- * Description: writes to the output file the answer to the problem according to its variant
+ * Description: writes to the output file the answer to the problem
  *****************************************************************************/
 
-void writeFile(FILE *file, Vector2 boardSize, int variant, Solution allMoves) {
+void writeFile(FILE *file, Vector2 boardSize, int variant, Solution answer) {
 
     uint moves;
     VectorList *move;
@@ -132,18 +125,17 @@ void writeFile(FILE *file, Vector2 boardSize, int variant, Solution allMoves) {
     /* Writing the problem header */
     fprintf(file, "%i %i %i\n",
                 boardSize.y, boardSize.x, variant);
-    if (!allMoves.moves) {
-        if (variant >= 0) {
+    if (!answer.moves) {
+        if (variant > 0) {
             fprintf(file, "0 -1\n\n");
-            return;
         } else {
             fprintf(file, "0 0\n\n");
-            return;
         }
+        return;
     } 
-    for (moves = 0, move = allMoves.moves; move; move = move->next, moves++);
-    fprintf(file, "%i %i\n", moves, allMoves.score);
-    for (move = allMoves.moves; move; move = move->next) fprintf(file, "%i %i\n", move->tile.y, move->tile.x);
+    for (moves = 0, move = answer.moves; move; move = move->next, moves++);
+    fprintf(file, "%i %i\n", moves, answer.score);
+    for (move = answer.moves; move; move = move->next) fprintf(file, "%i %i\n", move->tile.y, move->tile.x);
     fprintf(file, "\n");
 
     return;
