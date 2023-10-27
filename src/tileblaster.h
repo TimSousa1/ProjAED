@@ -3,47 +3,32 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #define uint unsigned int
 #define ushort unsigned short
 
+//Simple struct for coordinates
 typedef struct Vector2 {
     int x;
     int y;
 } Vector2;
 
+//Struct of a list whose item is a single coordinate
 typedef struct _vectorlist {
     Vector2 tile;
     
     struct _vectorlist *next;
 } VectorList;
 
-typedef struct _tileList{
-    Vector2 initPos;
-    Vector2 finalPos;
-
-    struct _tileList *next;
-} TileList;
-
+//Struct that has a list of all moves and the final score
 typedef struct _solution {
     int score;
     VectorList *moves;
 } Solution;
 
-typedef struct _cluster {
-    Vector2 tile;
-    int id;
-    uint numberOfTiles;
-    int color;
-    VectorList *tiles;
-} Cluster;
-
-typedef struct _clusterlist {
-    Cluster cluster;
-    struct _clusterlist *next;
-} ClusterList;
-
+//Struct that carries all the important information for each problem
+//Such as its size, its variant, how many colors it has and how many tiles of each tile and
+//The matrix that holds all tiles and their respective id
 typedef struct _board {
 
     int lines;
@@ -58,10 +43,9 @@ typedef struct _board {
 
 } Board;
 
+//Struct that holds all the important information for each play made
 typedef struct _moveList {
     Vector2 tile;
-    int color;
-    int id;
     int score;
 
     VectorList *clusters;
@@ -71,44 +55,36 @@ typedef struct _moveList {
     struct _moveList *previous;
 } MoveList;
 
+//file.c
 Board *getBoard(FILE*, int *error);
+char *outputName(char *inputName);
+void writeFile(FILE *file, Vector2 boardSize, int variant, Solution answer);
+
+//board.c
 Board *copyBoard(MoveList*);
 void freeBoard(Board *board);
-
 void countColors(Board *board);
-
 int findCluster(Board*, int line, int column, int color, int id);
 int blastCluster(Board*, int line, int column, int color, int id);
-
 VectorList *findAllClusters(Board*);
-
-int idSweep(Board *board, int lastID);
-int findTopSweep(Board*);
-Vector2 findBottomSweep(Board*, Vector2 play);
-int findLargest(Board*);
-
 MoveList *removeCluster(MoveList *lastMove, Vector2 tile);
 void resetClusterSets(Board*);
-
-VectorList *addToVectorList(VectorList *head, Vector2 tile);
 void applyGravity(Board*);
-
 uint hopeless(Board *board, int goal, MoveList *head);
 
-TileList *addToTileList(TileList *head, Vector2 initPos, Vector2 finalPos);
-
+//move.c
+VectorList *addToVectorList(VectorList *head, Vector2 tile);
 Solution solve(Board*);
 void freeMoveList(MoveList *head);
 void freeVectorList(VectorList *head);
 
+
+
+
 void showBoard(Board*);
 void showID(Board*);
-void showTileList(TileList *tiles);
 void showMoveList(MoveList *lastMove);
 void showVectorList(VectorList*);
 
-
-char *outputName(char *inputName);
-void writeFile(FILE *file, Vector2 boardSize, int variant, Solution answer);
 
 #endif

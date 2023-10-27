@@ -1,7 +1,6 @@
 #include "tileblaster.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 uint convert(int line, int column, int maxColumn);
 
@@ -156,6 +155,10 @@ MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
 
     if (!lastMove->previous) {
         move = (MoveList *) malloc(sizeof(MoveList));
+        if (!move) {
+            printf("Error allocating memory for variable \"move\", in function removeCluster()!\n");
+            exit(1);
+        }
         move->previous = NULL;
         lastMove->previous = move;
     } else {
@@ -167,8 +170,6 @@ MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
     copy->colors[color-1] -= tilesInCluster;
     
     move->tile = tile;
-    move->id = id;
-    move->color = color;
 
     move->score = tilesInCluster * (tilesInCluster - 1);
     move->next = lastMove;
@@ -273,11 +274,27 @@ Board *copyBoard(MoveList *move){
 
     if (!move->previous) {
         copied = (Board*) malloc (sizeof(*copied));
+        if (!copied) {
+            printf("Error allocating memory for variable \"copied\", in function copyBoard()!\n");
+            exit(1);
+        }
         copied->colors = (uint*) calloc (toCopy->numColors, sizeof(uint));
+        if (!copied->colors) {
+            printf("Error allocating memory for variable \"copied->colors\", in function copyBoard()!\n");
+            exit(1);
+        }
         copied->tiles = (Vector2 **) malloc (toCopy->lines * sizeof(Vector2 *));
+        if (!copied->tiles) {
+            printf("Error allocating memory for variable \"copied->tiles\", in function copyBoard()!\n");
+            exit(1);
+        }
 
         for (int k = 0; k < toCopy->lines; k++) {
             copied->tiles[k] = (Vector2 *) malloc (toCopy->columns * sizeof(Vector2));
+            if (!copied->tiles[k]) {
+            printf("Error allocating memory for variable \"copied->tiles[%i]\", in function copyBoard()!\n", k);
+            exit(1);
+            }
         }
     }
     else {
@@ -338,14 +355,6 @@ void showID(Board* board){
         fprintf(stdout, "\n");
     } 
     fprintf(stdout, "\n");
-}
-
-void showTileList(TileList *tiles) {
-
-    TileList *aux;
-    for (aux = tiles; aux; aux = aux->next) {
-        printf("%i %i\n%i %i\n\n", aux->initPos.y, aux->initPos.x, aux->finalPos.y, aux->finalPos.x);
-    }
 }
 
 void showVectorList(VectorList *head){

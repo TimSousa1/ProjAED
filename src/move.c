@@ -51,12 +51,13 @@ Solution solve(Board *board) {
     solution.moves = NULL;
 
     origin = (MoveList *) malloc(sizeof(*origin));
+    if (!origin) {
+        printf("Error allocating memory for variable \"origin\", in function solve()!\n");
+        exit(1);
+    }
 
     origin->tile.x = -1;
     origin->tile.y = -1;
-    origin->score = 0;
-    origin->id = -1;
-    origin->color = -1;
     origin->clusters = NULL;
     origin->next = NULL;
     origin->previous = NULL;
@@ -157,7 +158,6 @@ void showMoveList(MoveList *move) {
         printf("%i %i\n", aux->tile.y, aux->tile.x);
         showBoard(aux->board);
     }
-    printf("color: %i id: %i score: %i\n",
-            move->color, move->id, move->score);
+    printf("score: %i\n", move->score);
     printf("--------\n\n");
 }
