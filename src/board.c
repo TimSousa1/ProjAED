@@ -5,8 +5,9 @@
 /******************************************************************************
  * convert()
  *
- * Arguments: int line, int column and int maxColumn
- * Returns: uint <nameless>
+ * Arguments: the line and column for conversion, and the number of columns in
+ * the board
+ * Returns: uint id
  * Side-Effects: none
  *
  * Description: Calculates the equivalent id for a coordinate
@@ -19,11 +20,11 @@ uint convert(int line, int column, int maxColumn){
 /******************************************************************************
  * countColors()
  *
- * Arguments: Board *board
+ * Arguments: the board
  * Returns: nothing
- * Side-Effects: none
+ * Side-Effects: changes board->colors
  *
- * Description: Counts how many tiles are of each color and stores it in boaed->colors
+ * Description: Counts how many tiles there are of each color
  *****************************************************************************/
 
 void countColors(Board *board) {
@@ -39,8 +40,11 @@ void countColors(Board *board) {
 /******************************************************************************
  * findCluster()
  *
- * Arguments: Board *board, int line, int column, int clusterColor and int originalID
- * Returns: int tilesInCluster
+ * Arguments: board - the current playing board
+ *            line, column - the coordinates for the cluster we want to find
+ *            clusterColors - the color of the cluster
+ *            originalID - the cluster identifier
+ * Returns: number of tiles in cluster
  * Side-Effects: Changes every tile in the cluster to the same id
  *
  * Description: finds every tile that belongs to the same cluster and returns how many tiles
@@ -88,10 +92,12 @@ int findCluster(Board *board, int line, int column, int clusterColor, int origin
 /******************************************************************************
  * blastCluster()
  *
- * Arguments: Board *board, int line, int column, int clusterColor and int originalID
- * Returns: int tilesInCluster
- * Side-Effects: Changes every tile in the cluster to the same id and removes them
+ * Arguments: board - the current playing board
+ *            line, column - the coordinates for the cluster we want to find
+ *            clusterColors - the color of the cluster
+ *            originalID - the cluster identifier
  *
+ * Returns: number of removed tiles
  * Description: finds every tile that belongs to the same cluster, removing them, 
                 and returns how many tiles there are in the cluster
  *****************************************************************************/
@@ -132,11 +138,11 @@ int blastCluster(Board *board, int line, int column, int clusterColor, int origi
 }
 
 /******************************************************************************
- * findAllCluster()
+ * findAllClusters()
  *
- * Arguments: Board *board
- * Returns: VectorList *head
- * Side-Effects: Runs findCluster() for every valid tile, check the side effects of findCluster for more
+ * Arguments: board - the current playing board
+ * Returns: a list with a single coordinate of each found cluster
+ * Side-Effects: changes the ids of each tile
  *
  * Description: Obtains all possible valid moves for the current board and returns them in the form
                 of a list of coordinates
@@ -174,8 +180,9 @@ VectorList *findAllClusters(Board* board){
 /******************************************************************************
  * removeCluster()
  *
- * Arguments: MoveList *lastMove and Vector2 tile
- * Returns: MoveList *move
+ * Arguments: lastMove - the move that was last made
+ *            tile - coordinates of the cluster we want to remove
+ * Returns: move - the new move we made
  * Side-Effects: Creates a new MoveList and blasts the cluster in the argument tile
  *
  * Description: Makes a move, creating a MoveList or changing if it already exists
@@ -228,9 +235,9 @@ MoveList *removeCluster(MoveList *lastMove, Vector2 tile) {
 /******************************************************************************
  * resetClusterSets()
  *
- * Arguments: Board *board
+ * Arguments: board - the current playing board
  * Returns: nothing
- * Side-Effects: none
+ * Side-Effects: sets the ids of each tile to their sequential order
  *
  * Description: Sets the id matrix to its original values
  *****************************************************************************/
@@ -255,7 +262,8 @@ void resetClusterSets(Board* board) {
  *
  * Arguments: Board *board
  * Returns: nothing
- * Side-Effects: none
+ * Side-Effects: applies gravity to the whole board, changes each tile's color
+ *               in the board->tiles matrix
  *
  * Description: Simulates gravity where -1 means empty
  *****************************************************************************/
@@ -287,9 +295,9 @@ void applyVerticalGravity(Board *board){
 /******************************************************************************
  * applyHorizontalGravity()
  *
- * Arguments: Board *board
+ * Arguments: board - the current playing board
  * Returns: nothing
- * Side-Effects: none
+ * Side-Effects: changes the tiles of the board according to the applied gravity
  *
  * Description: Puts all empty columns in the left by sliding columns to the right
  *****************************************************************************/
@@ -319,7 +327,7 @@ void applyHorizontalGravity(Board *board){
  *
  * Arguments: Board *board
  * Returns: nothing
- * Side-Effects: none
+ * Side-Effects: changes the tiles of the board
  *
  * Description: Applies both vertical and horizontal gravity
  *****************************************************************************/
@@ -332,7 +340,7 @@ void applyGravity(Board *board) {
 /******************************************************************************
  * hopeless()
  *
- * Arguments: Board *board
+ * Arguments: board - the current playing board
  * Returns: 0 if there is hope or 1 if there isn't
  * Side-Effects: none
  *
@@ -358,8 +366,8 @@ uint hopeless(Board *board, int goal, MoveList *head) {
 /******************************************************************************
  * copyBoard()
  *
- * Arguments: MoveList *move
- * Returns: Board *copied
+ * Arguments: move - the move that has the desired board to be copied
+ * Returns: a copy of the move's board
  * Side-Effects: none
  *
  * Description: creates a copy of the board
@@ -422,9 +430,9 @@ Board *copyBoard(MoveList *move){
 /******************************************************************************
  * freeBoard()
  *
- * Arguments: Board *board
+ * Arguments: board - the current playing board
  * Returns: nothing
- * Side-Effects: none
+ * Side-Effects: free's the specified board
  *
  * Description: Frees all memory allocated for a board
  *****************************************************************************/
@@ -444,6 +452,7 @@ void freeBoard(Board *board) {
     return;
 }
 
+// prints all the board attributes
 void showBoard(Board *board){
     for (int i = board->lines - 1; i >= 0; i--) {
         for (int j = 0; j < board->columns; j++) {
@@ -456,6 +465,7 @@ void showBoard(Board *board){
             board->columns, board->lines, board->variant, board->numColors);
 }
 
+// prints the ids of every tile
 void showID(Board* board){
     for (int line = board->lines; line > 0; line--) {
         for (int column = 1; column <= board->columns; column++) {
@@ -466,6 +476,7 @@ void showID(Board* board){
     fprintf(stdout, "\n");
 }
 
+// prints all the Vector2s of a VectorList
 void showVectorList(VectorList *head){
 
 

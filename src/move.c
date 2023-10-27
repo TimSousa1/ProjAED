@@ -2,6 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/******************************************************************************
+ * addToVectorList()
+ *
+ * Arguments: head - the head of a list of tiles
+ *            tile - the tile being added to the list of tiles
+ * Returns: the new head of a stack VectorList
+ * Side-Effects: none
+ * Description: adds a vector to the vector list
+ *****************************************************************************/
+
 VectorList *addToVectorList(VectorList *head, Vector2 tile) {
 
     VectorList *vector = (VectorList *) malloc(sizeof(VectorList));
@@ -12,7 +22,16 @@ VectorList *addToVectorList(VectorList *head, Vector2 tile) {
     return vector;
 }
 
-// returns the new head of a stack VectorList
+/******************************************************************************
+ *removeVector()
+ *
+ * Arguments: head - the head of a list of vectors 
+ * Returns: the new head of a stack VectorList
+ * Side-Effects: free's the member wanting to be removed from the list
+ *
+ * Description: removes a vector from the vector list
+ *****************************************************************************/
+
 VectorList *removeVector(VectorList *head) {
 
     VectorList *ret = head->next;
@@ -20,6 +39,17 @@ VectorList *removeVector(VectorList *head) {
     return ret;
 
 }
+
+/******************************************************************************
+ * createSolution()
+ *
+ * Arguments: moves - a list of moves made throughout the program's execution
+ * Returns: a list of vectors with an associated score
+ * Side-Effects: none
+ *
+ * Description: creates a list of all the moves made in correct order and
+ *              a score
+ *****************************************************************************/
 
 Solution createSolution(MoveList *moves) {
     Solution answer;
@@ -39,6 +69,19 @@ Solution createSolution(MoveList *moves) {
     answer.moves = head;
     return answer;
 }
+
+/******************************************************************************
+ * solve()
+ *
+ * Arguments: board - the current playing board
+ * Returns: a solution for the wall of tiles
+ * Side-Effects: erases the board
+ *
+ * Description: solves the wall of tiles of the input board
+ *              creates a list of moves to move forward and backwards,
+ *              aiding with solving variants two and three.
+ *              
+ *****************************************************************************/
 
 Solution solve(Board *board) {
 
@@ -101,9 +144,7 @@ Solution solve(Board *board) {
             continue;
         }
 
-        //showBoard(board);
-        //printf("--removing--\n\n");
-        //printf("%i\n", id);
+        //showBoard(board); printf("--removing--\n\n"); printf("%i\n", id);
     
         current = removeCluster(current,  current->clusters->tile);
 
@@ -128,6 +169,17 @@ Solution solve(Board *board) {
     return solution;
 }
 
+/******************************************************************************
+ * freeMoveList()
+ *
+ * Arguments: head - the head of the MoveList
+ *
+ * Returns: nothing
+ * Side-Effects: free's the specified MoveList
+ *
+ * Description: Frees all memory allocated for a list of moves
+ *****************************************************************************/
+
 void freeMoveList(MoveList *head) {
 
     MoveList *moveTmp;
@@ -142,6 +194,16 @@ void freeMoveList(MoveList *head) {
     return;
 }
 
+/******************************************************************************
+ * freeVectorList()
+ *
+ * Arguments: head - the head of the VectorList wanting to be free'd
+ * Returns: nothing
+ * Side-Effects: free's the specified VectorList
+ *
+ * Description: Frees all memory allocated for a list of vectors
+ *****************************************************************************/
+
 void freeVectorList(VectorList *head) {
 
     VectorList *tmp;
@@ -152,6 +214,7 @@ void freeVectorList(VectorList *head) {
     }
 }
 
+// prints all the attributes of a MoveList
 void showMoveList(MoveList *move) {
     printf("--------\n");
     for (MoveList *aux = move; aux; aux=aux->previous) {

@@ -6,8 +6,9 @@
 /******************************************************************************
  * getBoard()
  *
- * Arguments: FILE *file and int *error
- * Returns: Board *board
+ * Arguments: file - the file being opened for reading
+ *            error - error code address for error handling
+ * Returns: the board read from the file
  * Side-Effects: changes the value of the second argument (error) if the problem is invalid
  *
  * Description: creates a Board and sets it up with the current problem information
@@ -72,11 +73,12 @@ Board *getBoard(FILE *file, int *error){
 /******************************************************************************
  * outputName()
  *
- * Arguments: char *inputName
- * Returns: char *outputName
+ * Arguments: inputName - input file name
+ *
+ * Returns: the output name of the file created by the program
  * Side-Effects: none
  *
- * Description: creates the name for the output file. Returns NULL if the input name is invalid
+ * Description: creates the name for the output file with the .tileblasts extension. Returns NULL if the input name is invalid
  *****************************************************************************/
 
 char *outputName(char *inputName) {
@@ -110,7 +112,9 @@ char *outputName(char *inputName) {
 /******************************************************************************
  * writeFile()
  *
- * Arguments: FILE *file, Vector2 boardSize, int variant and Solution answer
+ * Arguments: file - file to write out to
+ *            boardSize - the number of lines and the number of columns of the 
+ *            board
  * Returns: nothing
  * Side-Effects: none
  *
